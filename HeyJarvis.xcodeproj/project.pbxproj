@@ -15,6 +15,8 @@
 		1FDB811F19CD2F0D00EFA8D9 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1FDB811D19CD2F0D00EFA8D9 /* MainMenu.xib */; };
 		1FDB812B19CD2F0D00EFA8D9 /* HeyJarvisTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FDB812A19CD2F0D00EFA8D9 /* HeyJarvisTests.m */; };
 		333918580ADC4474AB6423DC /* libPods-HeyJarvis.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B112B5D9F034DCFB9630081 /* libPods-HeyJarvis.a */; };
+		429CA98B19CD821300C0A696 /* music.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 429CA98A19CD821300C0A696 /* music.scpt */; };
+		429CA98C19CD821300C0A696 /* music.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 429CA98A19CD821300C0A696 /* music.scpt */; };
 		6C85738D19CD52C0004D8B57 /* ActionHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 6C85738C19CD52C0004D8B57 /* ActionHandler.m */; };
 		F42B918519CD46B100E53CFE /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = F42B918419CD46B100E53CFE /* logo.png */; };
 /* End PBXBuildFile section */
@@ -43,6 +45,7 @@
 		1FDB812419CD2F0D00EFA8D9 /* HeyJarvisTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HeyJarvisTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1FDB812919CD2F0D00EFA8D9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1FDB812A19CD2F0D00EFA8D9 /* HeyJarvisTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HeyJarvisTests.m; sourceTree = "<group>"; };
+		429CA98A19CD821300C0A696 /* music.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; path = music.scpt; sourceTree = "<group>"; };
 		6C85738B19CD52C0004D8B57 /* ActionHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActionHandler.h; sourceTree = "<group>"; };
 		6C85738C19CD52C0004D8B57 /* ActionHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActionHandler.m; sourceTree = "<group>"; };
 		C0E47413CBA341FF914F152F /* Pods-HeyJarvis.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HeyJarvis.xcconfig"; path = "Pods/Pods-HeyJarvis.xcconfig"; sourceTree = "<group>"; };
@@ -106,6 +109,7 @@
 		1FDB811419CD2F0D00EFA8D9 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				429CA98A19CD821300C0A696 /* music.scpt */,
 				1FDB811519CD2F0D00EFA8D9 /* Info.plist */,
 				1FDB811619CD2F0D00EFA8D9 /* main.m */,
 			);
@@ -232,6 +236,7 @@
 				1F19E3BF19CD4FAB00A4446C /* mainlog.png in Resources */,
 				1FDB811C19CD2F0D00EFA8D9 /* Images.xcassets in Resources */,
 				1FDB811F19CD2F0D00EFA8D9 /* MainMenu.xib in Resources */,
+				429CA98B19CD821300C0A696 /* music.scpt in Resources */,
 				F42B918519CD46B100E53CFE /* logo.png in Resources */,
 				1F19E3BD19CD4CD300A4446C /* logo2.png in Resources */,
 			);
@@ -241,6 +246,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				429CA98C19CD821300C0A696 /* music.scpt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
