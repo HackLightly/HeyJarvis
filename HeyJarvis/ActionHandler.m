@@ -39,6 +39,11 @@
 - (id) init {
     notification = [[NSUserNotification alloc] init];
     self.store = [[EKEventStore alloc] init];
+    [self.store requestAccessToEntityType:EKEntityTypeEvent completion:^(BOOL granted, NSError *error) {
+        if (error){
+            NSLog(@"Error %@:", error);
+        }
+    }];
     return self;
 }
 
@@ -232,15 +237,19 @@
 
 - (void) sayDaySummary
 {
+    NSArray *array = [[NSArray alloc] initWithArray:[self getEvents]];
     NSLog(@"%@", [self getEvents]);
 }
 
 - (NSArray*) getEvents
 {
     // Get the appropriate calendar
-    NSCalendar *calendar = [NSCalendar currentCalendar];
+    NSCalendar *calendar = [NSCalendar autoupdatingCurrentCalendar]; //calwithid -> caltimezone
     NSDate *rightNow = [NSDate date];
-
+    
+    NSTimeZone* sourceTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"EST"];
+    //[NSTimeZone setDefaultTimeZone:sourceTimeZone];
+    [calendar setTimeZone:sourceTimeZone];
     
     NSDate *endOfDay = [calendar dateBySettingHour:23 minute:59 second:59 ofDate:rightNow options:NSCalendarMatchStrictly];
     
