@@ -42,7 +42,7 @@
 }
 
 -(void)checkForSound:(NSTimer *) timer{
-    NSLog(@"dbval:  %f",lastdbValue);
+    NSLog(@"dbval:  %f ",lastdbValue);
     if (lastdbValue >= 2.f && !self.isRecording){
         [self toggleRecording:YES];
         secondTimeCount = 0;
