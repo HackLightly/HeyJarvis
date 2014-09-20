@@ -26,6 +26,10 @@
     float endThreshold;
     int secondTimeCount;
     float lastdbValue;
+    
+    int currentFrame;
+    NSTimer* animTimer;
+    
     NSMutableArray *dbValueQueue;
     NSUserNotification *notification;
 }
@@ -254,11 +258,11 @@ withNumberOfChannels:(UInt32)numberOfChannels {
     
     //Allocates and loads the images into the application which will be used for our NSStatusItem
     statusImage = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"logo" ofType:@"png"]];
-    statusHighlightImage = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"logo2" ofType:@"png"]];
+    //statusHighlightImage = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"logo2" ofType:@"png"]];
     
     //Sets the images in our NSStatusItem
     [statusItem setImage:statusImage];
-    [statusItem setAlternateImage:statusHighlightImage];
+    //[statusItem setAlternateImage:statusHighlightImage];
     
     //Tells the NSStatusItem what menu to load
     [statusItem setMenu:statusMenu];
@@ -266,6 +270,61 @@ withNumberOfChannels:(UInt32)numberOfChannels {
     [statusItem setToolTip:@"Jarvis"];
     //Enables highlighting
     [statusItem setHighlightMode:YES];
+}
+
+- (void)changeStatus: (int) status {
+    currentFrame = 0;
+    if (animTimer) {
+        [animTimer invalidate];
+    }
+    switch (status) {
+        case -1: // Not listening
+        {
+            NSImage* image = [NSImage imageNamed:@"disabledlogo.png"];
+            [statusItem setImage:image];
+        }
+            break;
+        case 0: // Normal, nothing
+        {
+            NSImage* image = [NSImage imageNamed:@"logo.png"];
+            [statusItem setImage:image];
+        }
+            break;
+        case 1: // Listening
+        {
+            NSImage* image = [NSImage imageNamed:@"listenlogo.png"];
+            [statusItem setImage:image];
+        }
+            break;
+        case 2: // Processing
+        {
+             animTimer = [NSTimer scheduledTimerWithTimeInterval:1.0/30.0 target:self selector:@selector(updateProcessingImage:) userInfo:nil repeats:YES];
+        }
+            break;
+        case 3: // Speaking
+        {
+             animTimer = [NSTimer scheduledTimerWithTimeInterval:1.0/30.0 target:self selector:@selector(updateSpeakingImage:) userInfo:nil repeats:YES];
+        }
+            break;
+        default:
+            break;
+    }
+}
+
+- (void)updateProcessingImage:(NSTimer*)timer
+{
+    //get the image for the current frame
+    NSImage* image = [NSImage imageNamed:[NSString stringWithFormat:@"processing%d.png",currentFrame]];
+    [statusItem setImage:image];
+    currentFrame = (currentFrame + 1) % 3;
+}
+
+- (void)updateSpeakingImage:(NSTimer*)timer
+{
+    //get the image for the current frame
+    NSImage* image = [NSImage imageNamed:[NSString stringWithFormat:@"speaking%d.png",currentFrame]];
+    [statusItem setImage:image];
+    currentFrame = (currentFrame + 1) % 2;
 }
 
 @end
