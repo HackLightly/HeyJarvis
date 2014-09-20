@@ -199,7 +199,7 @@ typedef NS_ENUM(NSInteger, IntentType) {
      sp.delegate = self;
     NSDateFormatter *format = [[NSDateFormatter alloc] init];
     [format setDateFormat:@"HH:mm a"];
-    
+
     NSDate *now = [[NSDate alloc] init];
     
     NSString *dateString = [format stringFromDate:now];
