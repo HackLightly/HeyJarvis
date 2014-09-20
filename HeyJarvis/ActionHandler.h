@@ -10,8 +10,16 @@
 #ifndef HeyJarvis_ActionHandler_h
 #define HeyJarvis_ActionHandler_h
 
+
+@protocol MicDelegate <NSObject>
+- (void)muteMic:(BOOL)mute;
+@end
+
 @interface ActionHandler : NSObject {
 }
+
+@property (nonatomic, weak) id <MicDelegate> delegate;
+
 - (id) init;
 - (void) handleAction: (NSDictionary*)witResponse;
 

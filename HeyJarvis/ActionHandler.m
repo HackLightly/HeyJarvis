@@ -8,12 +8,13 @@
 
 #import <Foundation/Foundation.h>
 #import "ActionHandler.h"
+#import "AppDelegate.h"
 #import <AppKit/NSSpeechRecognizer.h>
 
 #define GREETING 0
 #define TIME 1
 
-@interface ActionHandler ()
+@interface ActionHandler () <NSSpeechSynthesizerDelegate>
 
 typedef NS_ENUM(NSInteger, IntentType) {
     IntentTypeTest,
@@ -38,6 +39,9 @@ typedef NS_ENUM(NSInteger, IntentType) {
     int intentID = [self decodeIntent:witResponse];
     
     // Dispatch action
+    if ([self.delegate respondsToSelector:@selector(muteMic:)]) {
+        [self.delegate muteMic:YES];
+    }
     switch (intentID) {
         case GREETING:
             [self sayGreeting];
@@ -64,14 +68,24 @@ typedef NS_ENUM(NSInteger, IntentType) {
 - (void) sayGreeting
 {
     NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
+    sp.delegate = self;
     [sp setVolume:100.0];
     [sp startSpeakingString:@"Hello master! How can I help you today?"];
+}
+
+-(void)speechSynthesizer:(NSSpeechSynthesizer *)sender didFinishSpeaking:(BOOL)finishedSpeaking{
+    if (finishedSpeaking){
+        if ([self.delegate respondsToSelector:@selector(muteMic:)]) {
+            [self.delegate muteMic:NO];
+        }
+    }
 }
 
 - (void) sayTime
 {
     NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
     [sp setVolume:100.0];
+     sp.delegate = self;
     NSDateFormatter *format = [[NSDateFormatter alloc] init];
     [format setDateFormat:@"HH:mm a"];
     

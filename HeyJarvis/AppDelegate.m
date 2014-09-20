@@ -18,7 +18,7 @@
 #define kAudioFilePath [NSString stringWithFormat:@"%@%@",NSHomeDirectory(),@"/test.wav"]
 #define kAudioFilePathConvert [NSString stringWithFormat:@"%@%@",NSHomeDirectory(),@"/test.mp3"]
 
-@interface AppDelegate () <EZMicrophoneDelegate, NSUserNotificationCenterDelegate, NSApplicationDelegate>{
+@interface AppDelegate () <EZMicrophoneDelegate, NSUserNotificationCenterDelegate, NSApplicationDelegate, MicDelegate>{
     BOOL _hasSomethingToPlay;
     int secondTimeCount;
     float lastdbValue;
@@ -106,6 +106,7 @@
                                                                  error:&serializationError];
         NSLog(@"Object %@", object);
         self.action = [[ActionHandler alloc] init];
+        self.action.delegate = self;
         [self.action handleAction:object];
         NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
         [sp setVolume:100.0];
@@ -119,6 +120,16 @@
         });
 
     }];
+}
+
+-(void)muteMic:(BOOL)mute{
+    if (mute){
+        [self.microphone stopFetchingAudio];
+        NSLog(@"Mic Mutted");
+    } else {
+        NSLog(@"Mic Listening");
+        [self.microphone startFetchingAudio];
+    }
 }
 
 - (void)readCompleted:(NSNotification *)notification {
