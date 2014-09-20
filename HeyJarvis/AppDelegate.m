@@ -43,7 +43,7 @@
 
 -(void)checkForSound:(NSTimer *) timer{
     NSLog(@"dbval:  %f ",lastdbValue);
-    if (lastdbValue >= 2.f && !self.isRecording){
+    if (lastdbValue >= 3.f && !self.isRecording){
         [self toggleRecording:YES];
         secondTimeCount = 0;
         self.isRecording = YES;
@@ -51,33 +51,57 @@
         self.isRecording = NO;
         secondTimeCount = 0;
         [self toggleRecording:NO];
-    } else if (lastdbValue <= 1.f){
+    } else if (lastdbValue <= 1.5f){
         secondTimeCount++;
     }
 }
 
--(void)playFile {
-    
+-(void)convertFile{
     // Update recording state
     self.isRecording = NO;
     if (self.recorder){
         [self.recorder closeAudioFile];
     }
-    
     NSTask *task = [[NSTask alloc] init];
     [task setLaunchPath:@"/bin/bash"];
     task.arguments = @[@"-c", @"/usr/local/bin/lame -h -b 192 ~/test.wav ~/test.mp3"];
     NSPipe *outputPipe = [NSPipe pipe];
-    [task setStandardOutput:outputPipe];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(readCompleted:) name:NSFileHandleReadToEndOfFileCompletionNotification object:[outputPipe fileHandleForReading]];
     [[outputPipe fileHandleForReading] readToEndOfFileInBackgroundAndNotify];
-    
+    [task setStandardOutput:outputPipe];
     [task launch];
-    
+    [task setTerminationHandler:^(NSTask *task) {
+        NSLog(@"ENCODING/UPLOADING");
+        
+        NSData * data = [[NSData alloc ]initWithContentsOfFile:kAudioFilePathConvert];
+        NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://api.wit.ai/speech?v=20140508"]];
+        [req setHTTPMethod:@"POST"];
+        [req setCachePolicy:NSURLCacheStorageNotAllowed];
+        [req setTimeoutInterval:15.0];
+        [req setHTTPBody:data];
+        [req setValue:[NSString stringWithFormat:@"Bearer %@", @"EUOKNV6J5WMTO5TVFH5YB7UJZRAFQ3KD"] forHTTPHeaderField:@"Authorization"];
+        [req setValue:@"audio/mpeg3" forHTTPHeaderField:@"Content-type"];
+        [req setValue:@"application/json" forHTTPHeaderField:@"Accept"];
+        
+        // send HTTP request
+        NSURLResponse* response = nil;
+        NSError *error = nil;
+        NSData *data2 = [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:&error];
+        
+        NSError *serializationError;
+        NSDictionary *object = [NSJSONSerialization JSONObjectWithData:data2
+                                                               options:0
+                                                                 error:&serializationError];
+        NSLog(@"Object %@", object);
+        NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
+        [sp setVolume:100.0];
+        //[sp startSpeakingString:object[@"msg_body"]];
+
+    }];
 }
 
 - (void)readCompleted:(NSNotification *)notification {
-    NSLog(@"ENCODING");
+    
+    NSLog(@"ENCODING/UPLOADING");
     
     NSData * data = [[NSData alloc ]initWithContentsOfFile:kAudioFilePathConvert];
     NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://api.wit.ai/speech?v=20140508"]];
@@ -103,6 +127,7 @@
     [sp setVolume:100.0];
     //[sp startSpeakingString:object[@"msg_body"]];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NSFileHandleReadToEndOfFileCompletionNotification object:[notification object]];
+    
 }
 
 -(void)toggleRecording:(BOOL)sender
@@ -111,7 +136,7 @@
     {
         case NO:{
             [self.recorder closeAudioFile];
-            [self playFile];
+            [self performSelectorInBackground:@selector(convertFile) withObject:nil];
         }
             break;
         case YES:
