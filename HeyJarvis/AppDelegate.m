@@ -40,6 +40,7 @@
 @implementation AppDelegate
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+    [NSApp setActivationPolicy: NSApplicationActivationPolicyAccessory];
     self.microphone = [EZMicrophone microphoneWithDelegate:self];
     [self.microphone startFetchingAudio];
     [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(checkForSound:) userInfo:nil repeats:YES];
@@ -54,11 +55,14 @@
 }
 
 -(void)checkForSound:(NSTimer *) timer{
+    if (!listening){
+        lastdbValue = 0.f;
+    }
     NSLog(@"dbval:  %f ",lastdbValue);
     if (lastdbValue >= 3.f && !self.isRecording){
         notification.title = @"Jarvis";
         notification.informativeText = @"Listening...";
-        [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
+        //[[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
         [self toggleRecording:YES];
         secondTimeCount = 0;
         self.isRecording = YES;
@@ -226,15 +230,20 @@ withNumberOfChannels:(UInt32)numberOfChannels {
     NSLog(@"about");
 }
 
-- (IBAction)setEnable:(id)sender {
-    NSLog(@"setEnable");
-    [self muteMic:NO];
-}
-
 - (IBAction)setDisable:(id)sender {
-    NSLog(@"setDisable");
-    [self muteMic:YES];
-    lastdbValue = 0.0f;
+    
+    if (listening){
+        NSLog(@"setDisable");
+        [sender setState:1];
+        [self muteMic:YES];
+        listening = NO;
+    } else {
+        NSLog(@"setEnable");
+        [sender setState:0];
+        [self muteMic:NO];
+        listening = YES;
+    }
+
 }
 
 

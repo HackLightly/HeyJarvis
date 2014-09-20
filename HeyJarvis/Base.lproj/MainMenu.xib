@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="6245" systemVersion="13F34" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="6245" systemVersion="13E28" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="6245"/>
     </dependencies>
@@ -19,12 +19,6 @@
         <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
         <menu id="VY3-qH-fmF">
             <items>
-                <menuItem title="Enable" id="wY7-ab-Xq7">
-                    <modifierMask key="keyEquivalentModifierMask"/>
-                    <connections>
-                        <action selector="setEnable:" target="Voe-Tx-rLC" id="E94-um-3WT"/>
-                    </connections>
-                </menuItem>
                 <menuItem title="Disable" id="CbQ-aE-h81">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
