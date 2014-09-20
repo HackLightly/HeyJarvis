@@ -22,6 +22,7 @@
 #define MESSAGE 8
 #define MUSIC 9
 #define JOKE 10
+#define STOP 11
 #define DEFAULT_SONG @"Call Me Maybe"
 
 @interface ActionHandler () <NSSpeechSynthesizerDelegate>
@@ -83,7 +84,7 @@ typedef NS_ENUM(NSInteger, IntentType) {
             }
         }
             break;
-        case LAUNCH: {
+        case LAUNCH: { //will not do anything if value is nil
             NSString *entities = [[witResponse valueForKey:@"outcome"] valueForKey:@"entities"];
             if (entities != nil) {
                 NSString *applicationJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"application"];
@@ -94,7 +95,7 @@ typedef NS_ENUM(NSInteger, IntentType) {
             }
         }
             break;
-        case SEARCH: {
+        case SEARCH: { //will not do anything if value is nil
             NSString *entities = [[witResponse valueForKey:@"outcome"] valueForKey:@"entities"];
             if (entities != nil) {
                 NSString *searchJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"search_query"];
@@ -103,6 +104,10 @@ typedef NS_ENUM(NSInteger, IntentType) {
                     [self  search:searchText];
                 }
             }
+        }
+            break;
+        case STOP: {
+            [self muteMicPLZ];
         }
             break;
     }
@@ -150,6 +155,9 @@ typedef NS_ENUM(NSInteger, IntentType) {
     }
     else if ([intent isEqualToString:@"joke"]) {
         return JOKE;
+    }
+    else if ([intent isEqualToString:@"stop"]) {
+        return STOP;
     }
     
     return -1;
