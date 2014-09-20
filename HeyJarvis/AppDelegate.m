@@ -38,36 +38,12 @@
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     self.microphone = [EZMicrophone microphoneWithDelegate:self];
     [self.microphone startFetchingAudio];
-    //[self toggleRecording:YES];
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        //[self playFile];
-        [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(checkForSound:) userInfo:nil repeats:YES];
-        //[self toggleRecording:NO];
-        
-    });
-    
-}
-
-#pragma mark - EZMicrophoneDelegate
-#warning Thread Safety
-// Note that any callback that provides streamed audio data (like streaming microphone input) happens on a separate audio thread that should not be blocked. When we feed audio data into any of the UI components we need to explicity create a GCD block on the main thread to properly get the UI to work.
--(void)microphone:(EZMicrophone *)microphone
- hasAudioReceived:(float **)buffer
-   withBufferSize:(UInt32)bufferSize
-withNumberOfChannels:(UInt32)numberOfChannels {
-    // Getting audio data as an array of float buffer arrays. What does that mean? Because the audio is coming in as a stereo signal the data is split into a left and right channel. So buffer[0] corresponds to the float* data for the left channel while buffer[1] corresponds to the float* data for the right channel.
-    
-    // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
-    dispatch_async(dispatch_get_main_queue(),^{
-        // Decibel Calculation.
-        lastdbValue = [EZAudio RMS:buffer[0] length:bufferSize]*100;
-        
-    });
+    [NSTimer scheduledTimerWithTimeInterval:0.4 target:self selector:@selector(checkForSound:) userInfo:nil repeats:YES];
 }
 
 -(void)checkForSound:(NSTimer *) timer{
     NSLog(@"dbval:  %f",lastdbValue);
-    if (lastdbValue >= 3 && !self.isRecording){
+    if (lastdbValue >= 3.f && !self.isRecording){
         [self toggleRecording:YES];
         secondTimeCount = 0;
         self.isRecording = YES;
@@ -149,13 +125,29 @@ withNumberOfChannels:(UInt32)numberOfChannels {
     self.isRecording = sender;
 }
 
+
+#pragma mark - EZMicrophoneDelegate
+// Note that any callback that provides streamed audio data (like streaming microphone input) happens on a separate audio thread that should not be blocked. When we feed audio data into any of the UI components we need to explicity create a GCD block on the main thread to properly get the UI to work.
+-(void)microphone:(EZMicrophone *)microphone
+ hasAudioReceived:(float **)buffer
+   withBufferSize:(UInt32)bufferSize
+withNumberOfChannels:(UInt32)numberOfChannels {
+    // Getting audio data as an array of float buffer arrays. What does that mean? Because the audio is coming in as a stereo signal the data is split into a left and right channel. So buffer[0] corresponds to the float* data for the left channel while buffer[1] corresponds to the float* data for the right channel.
+    
+    // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
+    dispatch_async(dispatch_get_main_queue(),^{
+        // Decibel Calculation.
+        lastdbValue = [EZAudio RMS:buffer[0] length:bufferSize]*100;
+        
+    });
+}
+
 // Append the microphone data coming as a AudioBufferList with the specified buffer size to the recorder
 -(void)microphone:(EZMicrophone *)microphone
     hasBufferList:(AudioBufferList *)bufferList
    withBufferSize:(UInt32)bufferSize
 withNumberOfChannels:(UInt32)numberOfChannels {
     // Getting audio data as a buffer list that can be directly fed into the EZRecorder. This is happening on the audio thread - any UI updating needs a GCD main queue block.
-    
     if( self.isRecording ){
         [self.recorder appendDataFromBufferList:bufferList
                                  withBufferSize:bufferSize];
@@ -165,6 +157,5 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     // Insert code here to tear down your application
 }
-
 
 @end
