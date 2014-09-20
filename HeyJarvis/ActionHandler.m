@@ -12,7 +12,15 @@
 #import <AppKit/NSSpeechRecognizer.h>
 
 #define GREETING 0
-#define TIME 1
+#define DAY_SUMMARY 1
+#define SEARCH 2
+#define NOTIFICATIONS 3
+#define LAUNCH 4
+#define REMIND 5
+#define WEATHER 6
+#define TIME 7
+#define MESSAGE 8
+#define MUSIC 9
 
 @interface ActionHandler () <NSSpeechSynthesizerDelegate>
 
@@ -66,8 +74,33 @@ typedef NS_ENUM(NSInteger, IntentType) {
     
     if ([intent isEqualToString:@"greeting"]){
         return GREETING;
-    } else if ([intent isEqualToString:@"time"]) {
+    }
+    else if ([intent isEqualToString:@"day_summary"]) {
+        return DAY_SUMMARY;
+    }
+    else if ([intent isEqualToString:@"search"]) {
+        return SEARCH;
+    }
+    else if ([intent isEqualToString:@"notifications"]) {
+        return NOTIFICATIONS;
+    }
+    else if ([intent isEqualToString:@"launch"]) {
+        return LAUNCH;
+    }
+    else if ([intent isEqualToString:@"remind"]) {
+        return REMIND;
+    }
+    else if ([intent isEqualToString:@"weather"]) {
+        return WEATHER;
+    }
+    else if ([intent isEqualToString:@"time"]) {
         return TIME;
+    }
+    else if ([intent isEqualToString:@"message"]) {
+        return MESSAGE;
+    }
+    else if ([intent isEqualToString:@"music"]) {
+        return MUSIC;
     }
     
     return -1;
