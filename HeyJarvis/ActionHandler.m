@@ -21,6 +21,7 @@
 #define TIME 7
 #define MESSAGE 8
 #define MUSIC 9
+#define JOKE 10
 #define DEFAULT_SONG @"Call Me Maybe"
 
 @interface ActionHandler () <NSSpeechSynthesizerDelegate>
@@ -55,11 +56,15 @@ typedef NS_ENUM(NSInteger, IntentType) {
             [self sayGreeting];
         }
             break;
-        case TIME:{
+        case TIME: {
             [self muteMicPLZ];
             [self sayTime];
         }
             break;
+        case JOKE: {
+            [self muteMicPLZ];
+            [self tellAJoke]; //tell a joke!
+        }
         case MUSIC: {
             NSString *entities = [[witResponse valueForKey:@"outcome"] valueForKey:@"entities"];
             if (entities != nil) {
@@ -131,6 +136,9 @@ typedef NS_ENUM(NSInteger, IntentType) {
     else if ([intent isEqualToString:@"music"]) {
         return MUSIC;
     }
+    else if ([intent isEqualToString:@"joke"]) {
+        return JOKE;
+    }
     
     return -1;
 }
@@ -141,6 +149,15 @@ typedef NS_ENUM(NSInteger, IntentType) {
     sp.delegate = self;
     [sp setVolume:100.0];
     [sp startSpeakingString:@"Hello master! How can I help you today?"];
+}
+
+//a little something for fun!
+- (void) tellAJoke
+{
+    NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
+    sp.delegate = self;
+    [sp setVolume:100.0];
+    [sp startSpeakingString:@"My End User License does not cover jokes. Don't you have something better to do?"];
 }
 
 -(void)speechSynthesizer:(NSSpeechSynthesizer *)sender didFinishSpeaking:(BOOL)finishedSpeaking{
