@@ -11,12 +11,13 @@
 @interface AppDelegate : NSObject <NSApplicationDelegate> {
     IBOutlet NSMenu *statusMenu;
     
-    /* The other stuff :P */
     NSStatusItem *statusItem;
     NSImage *statusImage;
     NSImage *statusHighlightImage;
+    
 }
+@property (assign) IBOutlet NSWindow *window;
 
-
+-(IBAction)helloWorld:(id)sender;
 @end
 

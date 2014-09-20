@@ -29,7 +29,7 @@
 @property (nonatomic,strong) AVAudioPlayer *audioPlayer;
 @property (nonatomic,strong) EZMicrophone *microphone;
 @property (nonatomic,strong) EZRecorder *recorder;
-@property (weak) IBOutlet NSWindow *window;
+//@property (weak) IBOutlet NSWindow *window;
 
 @end
 
@@ -156,6 +156,37 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     // Insert code here to tear down your application
+}
+
+#pragma mark - menubar
+
+-(IBAction)helloWorld:(id)sender {
+    NSLog(@"HEY");
+}
+
+
+- (void) awakeFromNib{
+    
+    //Create the NSStatusBar and set its length
+    statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSSquareStatusItemLength];
+    
+    //Used to detect where our files are
+    NSBundle *bundle = [NSBundle mainBundle];
+    
+    //Allocates and loads the images into the application which will be used for our NSStatusItem
+    statusImage = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"icon" ofType:@"png"]];
+    statusHighlightImage = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"icon-alt" ofType:@"png"]];
+    
+    //Sets the images in our NSStatusItem
+    [statusItem setImage:statusImage];
+    [statusItem setAlternateImage:statusHighlightImage];
+    
+    //Tells the NSStatusItem what menu to load
+    [statusItem setMenu:statusMenu];
+    //Sets the tooptip for our item
+    [statusItem setToolTip:@"My Custom Menu Item"];
+    //Enables highlighting
+    [statusItem setHighlightMode:YES];
 }
 
 @end
