@@ -10,6 +10,8 @@
 #import "ActionHandler.h"
 #import "AppDelegate.h"
 #import <AppKit/NSSpeechRecognizer.h>
+#import <EventKit/EKEventStore.h>
+#import <EventKit/EKEvent.h>
 
 #define GREETING 0
 #define DAY_SUMMARY 1
@@ -29,14 +31,7 @@
     NSUserNotification *notification;
 }
 
-
-
-typedef NS_ENUM(NSInteger, IntentType) {
-    IntentTypeTest,
-
-};
-
-@property (nonatomic, strong) NSDictionary *intentTypes;
+@property (nonatomic, strong) EKEventStore *store;
 
 @end
 
@@ -44,6 +39,12 @@ typedef NS_ENUM(NSInteger, IntentType) {
 
 - (id) init {
     notification = [[NSUserNotification alloc] init];
+    self.store = [[EKEventStore alloc] init];
+    [self.store requestAccessToEntityType:EKEntityTypeEvent completion:^(BOOL granted, NSError *error) {
+        if (error){
+            NSLog(@"Error %@:", error);
+        }
+    }];
     return self;
 }
 
@@ -118,6 +119,12 @@ typedef NS_ENUM(NSInteger, IntentType) {
         case WEATHER: {
             [self muteMicPLZ];
             [self sayWeather];
+        }
+            break;
+        
+        case DAY_SUMMARY: {
+            [self muteMicPLZ];
+            [self sayDaySummary];
         }
             break;
     }
@@ -204,8 +211,7 @@ typedef NS_ENUM(NSInteger, IntentType) {
     [sp setVolume:100.0];
      sp.delegate = self;
     NSDateFormatter *format = [[NSDateFormatter alloc] init];
-    [format setDateFormat:@"HH:mm a"];
-
+     [format setDateFormat:@"hh:mm a"];
     NSDate *now = [[NSDate alloc] init];
     
     NSString *dateString = [format stringFromDate:now];
@@ -230,7 +236,71 @@ typedef NS_ENUM(NSInteger, IntentType) {
     [sp startSpeakingString:weatherString];
 }
 
+- (void) sayDaySummary
+{
+    NSArray *events = [[NSArray alloc] initWithArray:[self getEvents]];
+    NSString *weatherString = [self getWeatherString:[self getWeatherInformation:@"Waterloo"]];
+    NSString *eventsString;
+    NSString *eventsDescriptor;
+    
+    unsigned long eventsCount = [events count];
+    
+    if (eventsCount < 1) {
+        // No events
+        eventsString = @"You have no more events scheduled for today.";
+    }
+    else if (eventsCount == 1) {
+        eventsString = @"You have one more event scheduled for today.";
+    }
+    else {
+        // More than one event
+        eventsString = [NSString stringWithFormat:@"You have %lu more events scheduled for today.", eventsCount];
+    }
+    
+    if (eventsCount >= 1) {
+        EKEvent *nextEvent = events[0];
+        NSDateFormatter *format = [[NSDateFormatter alloc] init];
+        [format setDateFormat:@"hh:mm a"];
+        
+        NSString *eventTime = [format stringFromDate:[nextEvent startDate]];
+        
+        eventsString = [NSString stringWithFormat:@"%@ Your next event is: %@, at %@", eventsString, [nextEvent title], eventTime];
+    }
+    
+    if (eventsCount <= 2) {
+        eventsDescriptor = @"The rest of your day is looking pretty good!";
+    }
+    else {
+        eventsDescriptor = @"It seems like you have a busy day ahead of you.";
+    }
+    
+    NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
+    [sp setVolume:100.0];
+    sp.delegate = self;
+    
+    [sp startSpeakingString:[NSString stringWithFormat:@"%@ %@ %@", eventsDescriptor, weatherString, eventsString]];
+}
 
+- (NSArray*) getEvents
+{
+    // Get the appropriate calendar
+    NSCalendar *calendar = [NSCalendar autoupdatingCurrentCalendar]; //calwithid -> caltimezone
+    NSDate *rightNow = [NSDate date];
+    
+    NSTimeZone* sourceTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"EST"];
+    //[NSTimeZone setDefaultTimeZone:sourceTimeZone];
+    [calendar setTimeZone:sourceTimeZone];
+    
+    NSDate *endOfDay = [calendar dateBySettingHour:23 minute:59 second:59 ofDate:rightNow options:NSCalendarMatchStrictly];
+    
+    // Create the predicate from the event store's instance method
+    NSPredicate *predicate = [self.store predicateForEventsWithStartDate:rightNow
+                                                            endDate:endOfDay
+                                                          calendars:nil];
+    NSLog(@"right now: %@ end: %@",rightNow, endOfDay);
+    // Fetch all events that match the predicate
+    return [[self.store eventsMatchingPredicate:predicate] sortedArrayUsingSelector:@selector(compareStartDateWithEvent:)];
+}
 
 - (void) playMusic: (NSString*)song
 {
