@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#import "ActionHandler.h"
 #import <EZAudio/EZAudio.h>
 #import <AFNetworking/AFNetworking.h>
 #import <AVFoundation/AVFoundation.h>
@@ -17,7 +18,7 @@
 #define kAudioFilePath [NSString stringWithFormat:@"%@%@",NSHomeDirectory(),@"/test.wav"]
 #define kAudioFilePathConvert [NSString stringWithFormat:@"%@%@",NSHomeDirectory(),@"/test.mp3"]
 
-@interface AppDelegate () <EZMicrophoneDelegate, NSUserNotificationCenterDelegate, NSApplicationDelegate>{
+@interface AppDelegate () <EZMicrophoneDelegate, NSUserNotificationCenterDelegate, NSApplicationDelegate, MicDelegate>{
     BOOL _hasSomethingToPlay;
     int secondTimeCount;
     float lastdbValue;
@@ -30,6 +31,7 @@
 @property (nonatomic,strong) AVAudioPlayer *audioPlayer;
 @property (nonatomic,strong) EZMicrophone *microphone;
 @property (nonatomic,strong) EZRecorder *recorder;
+@property (nonatomic,strong) ActionHandler *action;
 //@property (weak) IBOutlet NSWindow *window;
 
 @end
@@ -42,6 +44,7 @@
     [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(checkForSound:) userInfo:nil repeats:YES];
     notification = [[NSUserNotification alloc] init];
     [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
+    
 }
 
 - (BOOL)userNotificationCenter:(NSUserNotificationCenter *)center shouldPresentNotification:(NSUserNotification *)notification{
@@ -102,6 +105,9 @@
                                                                options:0
                                                                  error:&serializationError];
         NSLog(@"Object %@", object);
+        self.action = [[ActionHandler alloc] init];
+        self.action.delegate = self;
+        [self.action handleAction:object];
         NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
         [sp setVolume:100.0];
         [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
@@ -114,6 +120,16 @@
         });
 
     }];
+}
+
+-(void)muteMic:(BOOL)mute{
+    if (mute){
+        [self.microphone stopFetchingAudio];
+        NSLog(@"Mic Mutted");
+    } else {
+        NSLog(@"Mic Listening");
+        [self.microphone startFetchingAudio];
+    }
 }
 
 - (void)readCompleted:(NSNotification *)notification {
@@ -140,6 +156,7 @@
                                                            options:0
                                                              error:&serializationError];
     NSLog(@"Object %@", object);
+    
     NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
     [sp setVolume:100.0];
     //[sp startSpeakingString:object[@"msg_body"]];

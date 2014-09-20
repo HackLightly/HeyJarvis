@@ -8,15 +8,20 @@
 
 #import <Cocoa/Cocoa.h>
 
+
+
 @interface AppDelegate : NSObject <NSApplicationDelegate> {
     IBOutlet NSMenu *statusMenu;
     NSStatusItem *statusItem;
     NSImage *statusImage;
     NSImage *statusHighlightImage;
-    
 }
+
+
 @property (assign) IBOutlet NSWindow *window;
 
 -(IBAction)helloWorld:(id)sender;
+
+-(void)muteMic:(BOOL)mute;
 @end
 
