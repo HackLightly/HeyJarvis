@@ -65,6 +65,7 @@ typedef NS_ENUM(NSInteger, IntentType) {
             [self muteMicPLZ];
             [self tellAJoke]; //tell a joke!
         }
+            break;
         case MUSIC: {
             NSString *entities = [[witResponse valueForKey:@"outcome"] valueForKey:@"entities"];
             if (entities != nil) {
@@ -103,6 +104,7 @@ typedef NS_ENUM(NSInteger, IntentType) {
                 }
             }
         }
+            break;
     }
 }
 
