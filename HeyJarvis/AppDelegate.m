@@ -110,14 +110,13 @@
         [req setValue:[NSString stringWithFormat:@"Bearer %@", @"EUOKNV6J5WMTO5TVFH5YB7UJZRAFQ3KD"] forHTTPHeaderField:@"Authorization"];
         [req setValue:@"audio/mpeg3" forHTTPHeaderField:@"Content-type"];
         [req setValue:@"application/json" forHTTPHeaderField:@"Accept"];
-        
-        // send HTTP request
-        NSURLResponse* response = nil;
-        NSError *error = nil;
-        NSData *data2 = [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:&error];
+
+        [NSURLConnection sendAsynchronousRequest:req
+                                           queue:[NSOperationQueue mainQueue]
+                               completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
         
         NSError *serializationError;
-        NSDictionary *object = [NSJSONSerialization JSONObjectWithData:data2
+        NSDictionary *object = [NSJSONSerialization JSONObjectWithData:data
                                                                options:0
                                                                  error:&serializationError];
         NSLog(@"Object %@", object);
@@ -133,6 +132,7 @@
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(4.f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
              [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
         });
+                               }];
 
     }];
 }
@@ -162,7 +162,7 @@
     {
         case NO:{
             [self.recorder closeAudioFile];
-            [self performSelectorInBackground:@selector(convertFile) withObject:nil];
+            [self convertFile];
         }
             break;
         case YES:
