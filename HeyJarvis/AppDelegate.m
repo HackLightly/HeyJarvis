@@ -197,6 +197,7 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 
 -(IBAction)about:(id)sender {
     NSLog(@"about");
+    [self.aboutWindow makeKeyAndOrderFront:NSApp];
 }
 
 - (IBAction)setDisable:(id)sender {
