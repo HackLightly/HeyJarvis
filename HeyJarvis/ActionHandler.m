@@ -22,7 +22,8 @@
 #define MESSAGE 8
 #define MUSIC 9
 #define JOKE 10
-#define DEFAULT_SONG @"Call Me Maybe"
+#define STOP 11
+#define PLACEHOLDER_SONG @"92891230914290vnsar32uhf09ashr39h1od9"
 
 @interface ActionHandler () <NSSpeechSynthesizerDelegate>
 
@@ -75,15 +76,14 @@ typedef NS_ENUM(NSInteger, IntentType) {
                     if ([songName rangeOfString:@"music"].location != NSNotFound ||
                         [songName rangeOfString:@"some music"].location != NSNotFound ||
                         [songName rangeOfString:@"tunes"].location != NSNotFound) {
-                        //play default song = Call Me Maybe
-                        songName = DEFAULT_SONG;
+                        songName = PLACEHOLDER_SONG;
                     }
                     [self playMusic:songName];
                 }
             }
         }
             break;
-        case LAUNCH: {
+        case LAUNCH: { //will not do anything if value is nil
             NSString *entities = [[witResponse valueForKey:@"outcome"] valueForKey:@"entities"];
             if (entities != nil) {
                 NSString *applicationJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"application"];
@@ -94,7 +94,7 @@ typedef NS_ENUM(NSInteger, IntentType) {
             }
         }
             break;
-        case SEARCH: {
+        case SEARCH: { //will not do anything if value is nil
             NSString *entities = [[witResponse valueForKey:@"outcome"] valueForKey:@"entities"];
             if (entities != nil) {
                 NSString *searchJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"search_query"];
@@ -103,6 +103,10 @@ typedef NS_ENUM(NSInteger, IntentType) {
                     [self  search:searchText];
                 }
             }
+        }
+            break;
+        case STOP: {
+            [self muteMicPLZ];
         }
             break;
     }
@@ -151,6 +155,9 @@ typedef NS_ENUM(NSInteger, IntentType) {
     else if ([intent isEqualToString:@"joke"]) {
         return JOKE;
     }
+    else if ([intent isEqualToString:@"stop"]) {
+        return STOP;
+    }
     
     return -1;
 }
@@ -198,8 +205,17 @@ typedef NS_ENUM(NSInteger, IntentType) {
 - (void) playMusic: (NSString*)song
 {
     NSString *path = [[NSBundle mainBundle] pathForResource:@"music" ofType:@"scpt"];
-    NSArray *args = @[song];
-    [self executeScriptWithPath:path function:@"play" andArguments:args];
+    NSArray *args;
+    NSString *func;
+    if ([song  isEqualToString:PLACEHOLDER_SONG]) {
+        args = nil;
+        func = @"playAny";
+    }
+    else {
+        args = @[song];
+        func = @"play";
+    }
+    [self executeScriptWithPath:path function:func andArguments:args];
 }
 
 - (void) launchApplication: (NSString*) application
