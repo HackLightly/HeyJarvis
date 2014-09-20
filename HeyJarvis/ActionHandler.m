@@ -211,8 +211,7 @@
     [sp setVolume:100.0];
      sp.delegate = self;
     NSDateFormatter *format = [[NSDateFormatter alloc] init];
-    [format setDateFormat:@"hh:mm a"];
-    
+     [format setDateFormat:@"hh:mm a"];
     NSDate *now = [[NSDate alloc] init];
     
     NSString *dateString = [format stringFromDate:now];
