@@ -17,10 +17,11 @@
 #define kAudioFilePath [NSString stringWithFormat:@"%@%@",NSHomeDirectory(),@"/test.wav"]
 #define kAudioFilePathConvert [NSString stringWithFormat:@"%@%@",NSHomeDirectory(),@"/test.mp3"]
 
-@interface AppDelegate () <EZMicrophoneDelegate>{
+@interface AppDelegate () <EZMicrophoneDelegate, NSUserNotificationCenterDelegate, NSApplicationDelegate>{
     BOOL _hasSomethingToPlay;
     int secondTimeCount;
     float lastdbValue;
+    NSUserNotification *notification;
 }
 
 @property (nonatomic,assign) BOOL isRecording;
@@ -29,7 +30,7 @@
 @property (nonatomic,strong) AVAudioPlayer *audioPlayer;
 @property (nonatomic,strong) EZMicrophone *microphone;
 @property (nonatomic,strong) EZRecorder *recorder;
-@property (weak) IBOutlet NSWindow *window;
+//@property (weak) IBOutlet NSWindow *window;
 
 @end
 
@@ -39,11 +40,20 @@
     self.microphone = [EZMicrophone microphoneWithDelegate:self];
     [self.microphone startFetchingAudio];
     [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(checkForSound:) userInfo:nil repeats:YES];
+    notification = [[NSUserNotification alloc] init];
+    [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
+}
+
+- (BOOL)userNotificationCenter:(NSUserNotificationCenter *)center shouldPresentNotification:(NSUserNotification *)notification{
+    return YES;
 }
 
 -(void)checkForSound:(NSTimer *) timer{
     NSLog(@"dbval:  %f ",lastdbValue);
     if (lastdbValue >= 3.f && !self.isRecording){
+        notification.title = @"Jarvis";
+        notification.informativeText = @"Listening...";
+        [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
         [self toggleRecording:YES];
         secondTimeCount = 0;
         self.isRecording = YES;
@@ -94,7 +104,14 @@
         NSLog(@"Object %@", object);
         NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
         [sp setVolume:100.0];
+        [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
+        notification.title = @"Jarvis";
+        notification.informativeText = object[@"msg_body"];
+        [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
         //[sp startSpeakingString:object[@"msg_body"]];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+             [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
+        });
 
     }];
 }
@@ -102,7 +119,7 @@
 - (void)readCompleted:(NSNotification *)notification {
     
     NSLog(@"ENCODING/UPLOADING");
-    
+   
     NSData * data = [[NSData alloc ]initWithContentsOfFile:kAudioFilePathConvert];
     NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://api.wit.ai/speech?v=20140508"]];
     [req setHTTPMethod:@"POST"];
@@ -126,7 +143,6 @@
     NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
     [sp setVolume:100.0];
     //[sp startSpeakingString:object[@"msg_body"]];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSFileHandleReadToEndOfFileCompletionNotification object:[notification object]];
     
 }
 
@@ -181,6 +197,37 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     // Insert code here to tear down your application
+}
+
+#pragma mark - menubar
+
+-(IBAction)helloWorld:(id)sender {
+    NSLog(@"HEY");
+}
+
+
+- (void) awakeFromNib{
+    
+    //Create the NSStatusBar and set its length
+    statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSSquareStatusItemLength];
+    
+    //Used to detect where our files are
+    NSBundle *bundle = [NSBundle mainBundle];
+    
+    //Allocates and loads the images into the application which will be used for our NSStatusItem
+    statusImage = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"logo" ofType:@"png"]];
+    statusHighlightImage = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"logo" ofType:@"png"]];
+    
+    //Sets the images in our NSStatusItem
+    [statusItem setImage:statusImage];
+    [statusItem setAlternateImage:statusHighlightImage];
+    
+    //Tells the NSStatusItem what menu to load
+    [statusItem setMenu:statusMenu];
+    //Sets the tooptip for our item
+    [statusItem setToolTip:@"My Custom Menu Item"];
+    //Enables highlighting
+    [statusItem setHighlightMode:YES];
 }
 
 @end
