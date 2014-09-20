@@ -77,6 +77,17 @@ typedef NS_ENUM(NSInteger, IntentType) {
             }
         }
             break;
+        case LAUNCH: {
+            NSString *entities = [[witResponse valueForKey:@"outcome"] valueForKey:@"entities"];
+            if (entities != nil) {
+                NSString *applicationJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"application"];
+                if (applicationJSON != nil) {
+                    NSString *applicationName = [[[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"application"]valueForKey:@"value"];
+                    [self launchApplication:applicationName];
+                }
+            }
+        }
+            break;
     }
 }
 
@@ -160,6 +171,13 @@ typedef NS_ENUM(NSInteger, IntentType) {
     NSString *path = [[NSBundle mainBundle] pathForResource:@"music" ofType:@"scpt"];
     NSArray *args = @[song];
     [self executeScriptWithPath:path function:@"play" andArguments:args];
+}
+
+- (void) launchApplication: (NSString*) application
+{
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"launch" ofType:@"scpt"];
+    NSArray *args = @[application];
+    [self executeScriptWithPath:path function:@"start" andArguments:args];
 }
 
 //taken from https://stackoverflow.com/questions/6963072/execute-applescript-from-cocoa-app-with-params
