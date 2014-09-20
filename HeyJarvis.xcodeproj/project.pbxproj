@@ -24,6 +24,7 @@
 		429CA99619CDC7F700C0A696 /* music.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 429CA99419CDC7F700C0A696 /* music.scpt */; };
 		6C85738D19CD52C0004D8B57 /* ActionHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 6C85738C19CD52C0004D8B57 /* ActionHandler.m */; };
 		F42B918519CD46B100E53CFE /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = F42B918419CD46B100E53CFE /* logo.png */; };
+		F42B918A19CDCD0600E53CFE /* NSMutableArray+Queue.m in Sources */ = {isa = PBXBuildFile; fileRef = F42B918919CDCD0600E53CFE /* NSMutableArray+Queue.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +61,8 @@
 		6C85738C19CD52C0004D8B57 /* ActionHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActionHandler.m; sourceTree = "<group>"; };
 		C0E47413CBA341FF914F152F /* Pods-HeyJarvis.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HeyJarvis.xcconfig"; path = "Pods/Pods-HeyJarvis.xcconfig"; sourceTree = "<group>"; };
 		F42B918419CD46B100E53CFE /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
+		F42B918819CDCD0600E53CFE /* NSMutableArray+Queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableArray+Queue.h"; sourceTree = "<group>"; };
+		F42B918919CDCD0600E53CFE /* NSMutableArray+Queue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableArray+Queue.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,6 +108,8 @@
 		1FDB811319CD2F0D00EFA8D9 /* HeyJarvis */ = {
 			isa = PBXGroup;
 			children = (
+				F42B918819CDCD0600E53CFE /* NSMutableArray+Queue.h */,
+				F42B918919CDCD0600E53CFE /* NSMutableArray+Queue.m */,
 				1FDB811819CD2F0D00EFA8D9 /* AppDelegate.h */,
 				1FDB811919CD2F0D00EFA8D9 /* AppDelegate.m */,
 				1FDB811B19CD2F0D00EFA8D9 /* Images.xcassets */,
@@ -313,6 +318,7 @@
 				6C85738D19CD52C0004D8B57 /* ActionHandler.m in Sources */,
 				1FDB811A19CD2F0D00EFA8D9 /* AppDelegate.m in Sources */,
 				1FDB811719CD2F0D00EFA8D9 /* main.m in Sources */,
+				F42B918A19CDCD0600E53CFE /* NSMutableArray+Queue.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
