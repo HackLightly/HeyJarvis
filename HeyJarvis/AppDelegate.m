@@ -119,9 +119,9 @@
         [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
         notification.title = @"Jarvis";
         notification.informativeText = object[@"msg_body"];
-        [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
+        //[[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
         //[sp startSpeakingString:object[@"msg_body"]];
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(4.f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
              [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
         });
 
@@ -138,37 +138,6 @@
         listening = YES;
         NSLog(@"Mic Listening");
     }
-}
-
-- (void)readCompleted:(NSNotification *)notification {
-    
-    NSLog(@"ENCODING/UPLOADING");
-   
-    NSData * data = [[NSData alloc ]initWithContentsOfFile:kAudioFilePathConvert];
-    NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://api.wit.ai/speech?v=20140508"]];
-    [req setHTTPMethod:@"POST"];
-    [req setCachePolicy:NSURLCacheStorageNotAllowed];
-    [req setTimeoutInterval:15.0];
-    [req setHTTPBody:data];
-    [req setValue:[NSString stringWithFormat:@"Bearer %@", @"EUOKNV6J5WMTO5TVFH5YB7UJZRAFQ3KD"] forHTTPHeaderField:@"Authorization"];
-    [req setValue:@"audio/mpeg3" forHTTPHeaderField:@"Content-type"];
-    [req setValue:@"application/json" forHTTPHeaderField:@"Accept"];
-    
-    // send HTTP request
-    NSURLResponse* response = nil;
-    NSError *error = nil;
-    NSData *data2 = [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:&error];
-    
-    NSError *serializationError;
-    NSDictionary *object = [NSJSONSerialization JSONObjectWithData:data2
-                                                           options:0
-                                                             error:&serializationError];
-    NSLog(@"Object %@", object);
-    
-    NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
-    [sp setVolume:100.0];
-    //[sp startSpeakingString:object[@"msg_body"]];
-    
 }
 
 -(void)toggleRecording:(BOOL)sender

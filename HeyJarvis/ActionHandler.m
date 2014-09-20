@@ -24,7 +24,11 @@
 #define JOKE 10
 #define DEFAULT_SONG @"Call Me Maybe"
 
-@interface ActionHandler () <NSSpeechSynthesizerDelegate>
+@interface ActionHandler () <NSSpeechSynthesizerDelegate> {
+    NSUserNotification *notification;
+}
+
+
 
 typedef NS_ENUM(NSInteger, IntentType) {
     IntentTypeTest,
@@ -38,6 +42,7 @@ typedef NS_ENUM(NSInteger, IntentType) {
 @implementation ActionHandler
 
 - (id) init {
+    notification = [[NSUserNotification alloc] init];
     return self;
 }
 
@@ -192,6 +197,13 @@ typedef NS_ENUM(NSInteger, IntentType) {
     
     NSString *dateString = [format stringFromDate:now];
     [sp startSpeakingString:[NSString stringWithFormat:@"It's %@", dateString]];
+    [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
+    notification.title = @"Jarvis";
+    notification.informativeText = [NSString stringWithFormat:@"It's %@", dateString];
+    [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(4.f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
+    });
 }
 
 
