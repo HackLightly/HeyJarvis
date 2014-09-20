@@ -20,8 +20,9 @@
 
 @property (assign) IBOutlet NSWindow *window;
 
--(IBAction)helloWorld:(id)sender;
-
+-(IBAction)about:(id)sender;
+-(IBAction)setDisable:(id)sender;
+-(IBAction)setEnable:(id)sender;
 -(void)muteMic:(BOOL)mute;
 @end
 

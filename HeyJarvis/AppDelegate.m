@@ -218,10 +218,25 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 
 #pragma mark - menubar
 
--(IBAction)helloWorld:(id)sender {
-    NSLog(@"HEY");
+-(IBAction)about:(id)sender {
+    NSLog(@"about");
 }
 
+- (IBAction)setEnable:(id)sender {
+    NSLog(@"setEnable");
+    [self muteMic:NO];
+}
+
+- (IBAction)setDisable:(id)sender {
+    NSLog(@"setDisable");
+    [self muteMic:YES];
+    lastdbValue = 0.0f;
+}
+
+
+- (IBAction)calibrate:(id) sender {
+    NSLog(@"calibrate");
+}
 
 - (void) awakeFromNib{
     
