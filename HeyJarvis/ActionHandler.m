@@ -39,16 +39,24 @@ typedef NS_ENUM(NSInteger, IntentType) {
     int intentID = [self decodeIntent:witResponse];
     
     // Dispatch action
+
+    switch (intentID) {
+        case GREETING: {
+            [self muteMicPLZ];
+            [self sayGreeting];
+        }
+            break;
+        case TIME:{
+            [self muteMicPLZ];
+            [self sayTime];
+        }
+            break;
+    }
+}
+
+-(void)muteMicPLZ{
     if ([self.delegate respondsToSelector:@selector(muteMic:)]) {
         [self.delegate muteMic:YES];
-    }
-    switch (intentID) {
-        case GREETING:
-            [self sayGreeting];
-            break;
-        case TIME:
-            [self sayTime];
-            break;
     }
 }
 
