@@ -111,7 +111,6 @@
                                                                options:0
                                                                  error:&serializationError];
         NSLog(@"Object %@", object);
-        self.action = [[ActionHandler alloc] init];
         self.action.delegate = self;
         [self.action handleAction:object];
         NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
@@ -126,6 +125,13 @@
         });
 
     }];
+}
+
+-(ActionHandler *)action {
+    if (!_action) {
+        _action = [[ActionHandler alloc] init];
+    }
+    return _action;
 }
 
 -(void)muteMic:(BOOL)mute{
