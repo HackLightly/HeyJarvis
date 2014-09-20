@@ -93,6 +93,16 @@ typedef NS_ENUM(NSInteger, IntentType) {
             }
         }
             break;
+        case SEARCH: {
+            NSString *entities = [[witResponse valueForKey:@"outcome"] valueForKey:@"entities"];
+            if (entities != nil) {
+                NSString *searchJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"search_query"];
+                if (searchJSON != nil) {
+                    NSString *searchText = [[[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"search_query"]valueForKey:@"value"];
+                    [self  search:searchText];
+                }
+            }
+        }
     }
 }
 
@@ -195,6 +205,14 @@ typedef NS_ENUM(NSInteger, IntentType) {
     NSString *path = [[NSBundle mainBundle] pathForResource:@"launch" ofType:@"scpt"];
     NSArray *args = @[application];
     [self executeScriptWithPath:path function:@"start" andArguments:args];
+}
+
+- (void) search: (NSString*) searchTerm
+{
+    NSString *formattedUrl = [NSString stringWithFormat:@"%@%@", @"https://www.google.com/search?q=", [searchTerm stringByReplacingOccurrencesOfString:@" " withString:@"%20"]];
+    NSArray *urlArg = @[formattedUrl];
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"search" ofType:@"scpt"];
+    [self executeScriptWithPath:path function:@"openInSafari" andArguments:urlArg];
 }
 
 //taken from https://stackoverflow.com/questions/6963072/execute-applescript-from-cocoa-app-with-params
