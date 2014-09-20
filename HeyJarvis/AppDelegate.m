@@ -13,6 +13,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <AppKit/NSSpeechSynthesizer.h>
 #import <Accelerate/Accelerate.h>
+#import "NSMutableArray+Queue.h"
 
 
 #define kAudioFilePath [NSString stringWithFormat:@"%@%@",NSHomeDirectory(),@"/test.wav"]
@@ -21,8 +22,11 @@
 @interface AppDelegate () <EZMicrophoneDelegate, NSUserNotificationCenterDelegate, NSApplicationDelegate, MicDelegate>{
     BOOL _hasSomethingToPlay;
     BOOL listening;
+    float beginThreshold;
+    float endThreshold;
     int secondTimeCount;
     float lastdbValue;
+    NSMutableArray *dbValueQueue;
     NSUserNotification *notification;
 }
 
@@ -40,6 +44,8 @@
 @implementation AppDelegate
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+    dbValueQueue = [[NSMutableArray alloc] init];
+    
     self.microphone = [EZMicrophone microphoneWithDelegate:self];
     [self.microphone startFetchingAudio];
     [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(checkForSound:) userInfo:nil repeats:YES];
@@ -47,6 +53,9 @@
     [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
     listening = YES;
     
+    /* might want to calibrate on startup instead of this */
+    beginThreshold = 3.0f;
+    endThreshold = 1.5f;
 }
 
 - (BOOL)userNotificationCenter:(NSUserNotificationCenter *)center shouldPresentNotification:(NSUserNotification *)notification{
@@ -54,8 +63,9 @@
 }
 
 -(void)checkForSound:(NSTimer *) timer{
+    [dbValueQueue pushFloat:lastdbValue withMax:10];
     NSLog(@"dbval:  %f ",lastdbValue);
-    if (lastdbValue >= 3.f && !self.isRecording){
+    if (lastdbValue >= beginThreshold && !self.isRecording){
         notification.title = @"Jarvis";
         notification.informativeText = @"Listening...";
         [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
@@ -66,7 +76,7 @@
         self.isRecording = NO;
         secondTimeCount = 0;
         [self toggleRecording:NO];
-    } else if (lastdbValue <= 1.5f){
+    } else if (lastdbValue <= endThreshold){
         secondTimeCount++;
     }
 }
@@ -240,7 +250,13 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 
 - (IBAction)calibrate:(id) sender {
     NSLog(@"calibrate");
-    
+    NSDictionary* values = [dbValueQueue evaluate];
+    NSLog(@"AVERAGE: %f", [[values objectForKey:@"average"] floatValue]);
+    NSLog(@"PEAK: %f", [[values objectForKey:@"peak"] floatValue]);
+    NSLog(@"LOW: %f", [[values objectForKey:@"low"] floatValue]);
+
+    beginThreshold = [[values objectForKey:@"peak"] floatValue];
+    endThreshold = [[values objectForKey:@"average"] floatValue];
 }
 
 - (void) awakeFromNib{
