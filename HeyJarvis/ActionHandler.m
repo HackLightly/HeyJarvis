@@ -23,7 +23,7 @@
 #define MUSIC 9
 #define JOKE 10
 #define STOP 11
-#define DEFAULT_SONG @"Call Me Maybe"
+#define PLACEHOLDER_SONG @"92891230914290vnsar32uhf09ashr39h1od9"
 
 @interface ActionHandler () <NSSpeechSynthesizerDelegate>
 
@@ -76,8 +76,7 @@ typedef NS_ENUM(NSInteger, IntentType) {
                     if ([songName rangeOfString:@"music"].location != NSNotFound ||
                         [songName rangeOfString:@"some music"].location != NSNotFound ||
                         [songName rangeOfString:@"tunes"].location != NSNotFound) {
-                        //play default song = Call Me Maybe
-                        songName = DEFAULT_SONG;
+                        songName = PLACEHOLDER_SONG;
                     }
                     [self playMusic:songName];
                 }
@@ -206,8 +205,17 @@ typedef NS_ENUM(NSInteger, IntentType) {
 - (void) playMusic: (NSString*)song
 {
     NSString *path = [[NSBundle mainBundle] pathForResource:@"music" ofType:@"scpt"];
-    NSArray *args = @[song];
-    [self executeScriptWithPath:path function:@"play" andArguments:args];
+    NSArray *args;
+    NSString *func;
+    if ([song  isEqualToString:PLACEHOLDER_SONG]) {
+        args = nil;
+        func = @"playAny";
+    }
+    else {
+        args = @[song];
+        func = @"play";
+    }
+    [self executeScriptWithPath:path function:func andArguments:args];
 }
 
 - (void) launchApplication: (NSString*) application
