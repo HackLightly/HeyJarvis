@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="6245" systemVersion="13F34" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="6245" systemVersion="13E28" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="6245"/>
     </dependencies>
@@ -19,25 +19,20 @@
         <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
         <menu id="VY3-qH-fmF">
             <items>
-                <menuItem title="Item 1" id="mCE-iL-SsL">
+                <menuItem title="About" id="mCE-iL-SsL">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="helloWorld:" target="Voe-Tx-rLC" id="Fpt-sq-2cp"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Item 2" id="gyi-Ps-97k">
-                    <modifierMask key="keyEquivalentModifierMask"/>
-                    <connections>
-                        <action selector="helloWorld:" target="Voe-Tx-rLC" id="5kk-J0-z3N"/>
-                    </connections>
-                </menuItem>
-                <menuItem title="Item 3" id="eQh-NP-16C">
+                <menuItem title="Quit" id="eQh-NP-16C">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="terminate:" target="-1" id="rf4-wq-12I"/>
                     </connections>
                 </menuItem>
             </items>
+            <point key="canvasLocation" x="139.5" y="151.5"/>
         </menu>
     </objects>
 </document>

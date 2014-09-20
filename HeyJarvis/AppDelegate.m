@@ -17,10 +17,11 @@
 #define kAudioFilePath [NSString stringWithFormat:@"%@%@",NSHomeDirectory(),@"/test.wav"]
 #define kAudioFilePathConvert [NSString stringWithFormat:@"%@%@",NSHomeDirectory(),@"/test.mp3"]
 
-@interface AppDelegate () <EZMicrophoneDelegate>{
+@interface AppDelegate () <EZMicrophoneDelegate, NSUserNotificationCenterDelegate, NSApplicationDelegate>{
     BOOL _hasSomethingToPlay;
     int secondTimeCount;
     float lastdbValue;
+    NSUserNotification *notification;
 }
 
 @property (nonatomic,assign) BOOL isRecording;
@@ -39,11 +40,20 @@
     self.microphone = [EZMicrophone microphoneWithDelegate:self];
     [self.microphone startFetchingAudio];
     [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(checkForSound:) userInfo:nil repeats:YES];
+    notification = [[NSUserNotification alloc] init];
+    [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
+}
+
+- (BOOL)userNotificationCenter:(NSUserNotificationCenter *)center shouldPresentNotification:(NSUserNotification *)notification{
+    return YES;
 }
 
 -(void)checkForSound:(NSTimer *) timer{
     NSLog(@"dbval:  %f ",lastdbValue);
     if (lastdbValue >= 3.f && !self.isRecording){
+        notification.title = @"Jarvis";
+        notification.informativeText = @"Listening...";
+        [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
         [self toggleRecording:YES];
         secondTimeCount = 0;
         self.isRecording = YES;
@@ -94,7 +104,14 @@
         NSLog(@"Object %@", object);
         NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
         [sp setVolume:100.0];
+        [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
+        notification.title = @"Jarvis";
+        notification.informativeText = object[@"msg_body"];
+        [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
         //[sp startSpeakingString:object[@"msg_body"]];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+             [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
+        });
 
     }];
 }
@@ -102,7 +119,7 @@
 - (void)readCompleted:(NSNotification *)notification {
     
     NSLog(@"ENCODING/UPLOADING");
-    
+   
     NSData * data = [[NSData alloc ]initWithContentsOfFile:kAudioFilePathConvert];
     NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://api.wit.ai/speech?v=20140508"]];
     [req setHTTPMethod:@"POST"];
@@ -126,7 +143,6 @@
     NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
     [sp setVolume:100.0];
     //[sp startSpeakingString:object[@"msg_body"]];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSFileHandleReadToEndOfFileCompletionNotification object:[notification object]];
     
 }
 
