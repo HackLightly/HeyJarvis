@@ -10,6 +10,7 @@
 #import "ActionHandler.h"
 #import "AppDelegate.h"
 #import <AppKit/NSSpeechRecognizer.h>
+#import <EventKit/EKEventStore.h>
 
 #define GREETING 0
 #define DAY_SUMMARY 1
@@ -29,14 +30,7 @@
     NSUserNotification *notification;
 }
 
-
-
-typedef NS_ENUM(NSInteger, IntentType) {
-    IntentTypeTest,
-
-};
-
-@property (nonatomic, strong) NSDictionary *intentTypes;
+@property (nonatomic, strong) EKEventStore *store;
 
 @end
 
@@ -44,6 +38,7 @@ typedef NS_ENUM(NSInteger, IntentType) {
 
 - (id) init {
     notification = [[NSUserNotification alloc] init];
+    self.store = [[EKEventStore alloc] init];
     return self;
 }
 
@@ -118,6 +113,11 @@ typedef NS_ENUM(NSInteger, IntentType) {
         case WEATHER: {
             [self muteMicPLZ];
             [self sayWeather];
+        }
+            break;
+        
+        case DAY_SUMMARY: {
+            [self sayDaySummary];
         }
             break;
     }
@@ -230,7 +230,28 @@ typedef NS_ENUM(NSInteger, IntentType) {
     [sp startSpeakingString:weatherString];
 }
 
+- (void) sayDaySummary
+{
+    NSLog(@"%@", [self getEvents]);
+}
 
+- (NSArray*) getEvents
+{
+    // Get the appropriate calendar
+    NSCalendar *calendar = [NSCalendar currentCalendar];
+    NSDate *rightNow = [NSDate date];
+
+    
+    NSDate *endOfDay = [calendar dateBySettingHour:23 minute:59 second:59 ofDate:rightNow options:NSCalendarMatchStrictly];
+    
+    // Create the predicate from the event store's instance method
+    NSPredicate *predicate = [self.store predicateForEventsWithStartDate:rightNow
+                                                            endDate:endOfDay
+                                                          calendars:nil];
+    NSLog(@"right now: %@ end: %@",rightNow, endOfDay);
+    // Fetch all events that match the predicate
+    return [self.store eventsMatchingPredicate:predicate];
+}
 
 - (void) playMusic: (NSString*)song
 {
