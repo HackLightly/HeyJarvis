@@ -91,6 +91,7 @@
     if (self.recorder){
         [self.recorder closeAudioFile];
     }
+   
     NSTask *task = [[NSTask alloc] init];
     [task setLaunchPath:@"/bin/bash"];
     task.arguments = @[@"-c", @"/usr/local/bin/lame -h -b 192 ~/test.wav ~/test.mp3"];
@@ -110,30 +111,29 @@
         [req setValue:[NSString stringWithFormat:@"Bearer %@", @"EUOKNV6J5WMTO5TVFH5YB7UJZRAFQ3KD"] forHTTPHeaderField:@"Authorization"];
         [req setValue:@"audio/mpeg3" forHTTPHeaderField:@"Content-type"];
         [req setValue:@"application/json" forHTTPHeaderField:@"Accept"];
-
+        
         [NSURLConnection sendAsynchronousRequest:req
                                            queue:[NSOperationQueue mainQueue]
                                completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
-        
-        NSError *serializationError;
-        NSDictionary *object = [NSJSONSerialization JSONObjectWithData:data
-                                                               options:0
-                                                                 error:&serializationError];
-        NSLog(@"Object %@", object);
-        self.action.delegate = self;
-        [self.action handleAction:object];
-        NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
-        [sp setVolume:100.0];
-        [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
-        notification.title = @"Jarvis";
-        notification.informativeText = object[@"msg_body"];
-        //[[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
-        //[sp startSpeakingString:object[@"msg_body"]];
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(4.f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-             [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
-        });
+                                   
+                                   NSError *serializationError;
+                                   NSDictionary *object = [NSJSONSerialization JSONObjectWithData:data
+                                                                                          options:0
+                                                                                            error:&serializationError];
+                                   NSLog(@"Object %@", object);
+                                   self.action.delegate = self;
+                                   [self.action handleAction:object];
+                                   NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
+                                   [sp setVolume:100.0];
+                                   [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
+                                   notification.title = @"Jarvis";
+                                   notification.informativeText = object[@"msg_body"];
+                                   //[[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
+                                   //[sp startSpeakingString:object[@"msg_body"]];
+                                   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(4.f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                                       [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
+                                   });
                                }];
-
     }];
 }
 
