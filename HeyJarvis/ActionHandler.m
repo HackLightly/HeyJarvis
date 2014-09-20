@@ -114,6 +114,12 @@ typedef NS_ENUM(NSInteger, IntentType) {
             [self muteMicPLZ];
         }
             break;
+        
+        case WEATHER: {
+            [self muteMicPLZ];
+            [self sayWeather];
+        }
+            break;
     }
 }
 
@@ -212,6 +218,18 @@ typedef NS_ENUM(NSInteger, IntentType) {
         [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
     });
 }
+
+- (void) sayWeather
+{
+    NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
+    [sp setVolume:100.0];
+    sp.delegate = self;
+    
+    NSString *weatherString = [self getWeatherString:[self getWeatherInformation:@"Waterloo"]];
+    
+    [sp startSpeakingString:weatherString];
+}
+
 
 
 - (void) playMusic: (NSString*)song
@@ -335,6 +353,68 @@ typedef NS_ENUM(NSInteger, IntentType) {
     return executionSucceed;
 }
 
+- (NSDictionary*) makeGETRequest:(NSString *) url
+{
+    NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]];
+    [req setHTTPMethod:@"GET"];
+    [req setCachePolicy:NSURLCacheStorageNotAllowed];
+    [req setTimeoutInterval:15.0];
+    
+    // send HTTP request
+    NSURLResponse* response = nil;
+    NSError *error = nil;
+    NSData *data2 = [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:&error];
+    
+    NSError *serializationError;
+    NSDictionary *object = [NSJSONSerialization JSONObjectWithData:data2
+                                                           options:0
+                                                             error:&serializationError];
+    return object;
+}
+
+- (NSDictionary*) getWeatherInformation:(NSString *) locationQuery
+{
+    return [self makeGETRequest:
+            [NSString stringWithFormat:@"http://api.openweathermap.org/data/2.5/weather?units=metric&q=%@", locationQuery]];
+}
+
+- (NSString*) getWeatherDescriptionFromIcon:(NSString *) iconString
+{
+    NSString *description = @"It's";
+    
+    if ([iconString isEqualToString:@"01d"] || [iconString isEqualToString:@"01n"]) {
+        description = @"It's currently clear and";
+    }
+    else if ([iconString isEqualToString:@"02d"] || [iconString isEqualToString:@"02n"] ||
+             [iconString isEqualToString:@"03d"] || [iconString isEqualToString:@"03n"] ||
+             [iconString isEqualToString:@"04d"] || [iconString isEqualToString:@"04n"]) {
+        description = @"It's currently a little cloudy and";
+    }
+    else if ([iconString isEqualToString:@"09d"] || [iconString isEqualToString:@"09n"] ||
+             [iconString isEqualToString:@"10d"] || [iconString isEqualToString:@"10n"] ||
+             [iconString isEqualToString:@"11d"] || [iconString isEqualToString:@"11n"]) {
+        description = @"It's currently raining and";
+    }
+    else if ([iconString isEqualToString:@"13d"] || [iconString isEqualToString:@"13n"]) {
+        description = @"It's currently snowing and";
+    }
+    else if ([iconString isEqualToString:@"50d"] || [iconString isEqualToString:@"50n"]) {
+        description = @"It's currently foggy and";
+    }
+    
+    return description;
+}
+
+- (NSString*) getWeatherString:(NSDictionary*)weatherResponse
+{
+    NSString *icon = [[weatherResponse valueForKey:@"weather"][0] valueForKey:@"icon"];
+    NSString *conditions = [self getWeatherDescriptionFromIcon:icon];
+    
+    int temperature = (int) lroundf([[[weatherResponse valueForKey:@"main"] valueForKey:@"temp"] floatValue]);
+    NSLog(@"%d", temperature);
+    
+    return [NSString stringWithFormat:@"%@ %d degrees outside.", conditions, temperature];
+}
 
 
 @end
