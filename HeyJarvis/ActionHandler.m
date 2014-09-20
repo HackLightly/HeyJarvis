@@ -371,23 +371,23 @@ typedef NS_ENUM(NSInteger, IntentType) {
     NSString *description = @"It's";
     
     if ([iconString isEqualToString:@"01d"] || [iconString isEqualToString:@"01n"]) {
-        description = @"It's currently clear";
+        description = @"It's currently clear and";
     }
     else if ([iconString isEqualToString:@"02d"] || [iconString isEqualToString:@"02n"] ||
              [iconString isEqualToString:@"03d"] || [iconString isEqualToString:@"03n"] ||
              [iconString isEqualToString:@"04d"] || [iconString isEqualToString:@"04n"]) {
-        description = @"It's currently a little cloudy";
+        description = @"It's currently a little cloudy and";
     }
     else if ([iconString isEqualToString:@"09d"] || [iconString isEqualToString:@"09n"] ||
              [iconString isEqualToString:@"10d"] || [iconString isEqualToString:@"10n"] ||
              [iconString isEqualToString:@"11d"] || [iconString isEqualToString:@"11n"]) {
-        description = @"It's currently raining";
+        description = @"It's currently raining and";
     }
     else if ([iconString isEqualToString:@"13d"] || [iconString isEqualToString:@"13n"]) {
-        description = @"It's currently snowing";
+        description = @"It's currently snowing and";
     }
     else if ([iconString isEqualToString:@"50d"] || [iconString isEqualToString:@"50n"]) {
-        description = @"It's currently foggy";
+        description = @"It's currently foggy and";
     }
     
     return description;
@@ -401,7 +401,7 @@ typedef NS_ENUM(NSInteger, IntentType) {
     int temperature = (int) lroundf([[[weatherResponse valueForKey:@"main"] valueForKey:@"temp"] floatValue]);
     NSLog(@"%d", temperature);
     
-    return [NSString stringWithFormat:@"%@ and %d degrees outside.", conditions, temperature];
+    return [NSString stringWithFormat:@"%@ %d degrees outside.", conditions, temperature];
 }
 
 
