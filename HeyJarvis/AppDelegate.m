@@ -38,12 +38,12 @@
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     self.microphone = [EZMicrophone microphoneWithDelegate:self];
     [self.microphone startFetchingAudio];
-    [NSTimer scheduledTimerWithTimeInterval:0.4 target:self selector:@selector(checkForSound:) userInfo:nil repeats:YES];
+    [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(checkForSound:) userInfo:nil repeats:YES];
 }
 
 -(void)checkForSound:(NSTimer *) timer{
     NSLog(@"dbval:  %f",lastdbValue);
-    if (lastdbValue >= 3.f && !self.isRecording){
+    if (lastdbValue >= 2.f && !self.isRecording){
         [self toggleRecording:YES];
         secondTimeCount = 0;
         self.isRecording = YES;
@@ -51,7 +51,7 @@
         self.isRecording = NO;
         secondTimeCount = 0;
         [self toggleRecording:NO];
-    } else {
+    } else if (lastdbValue <= 1.f){
         secondTimeCount++;
     }
 }
