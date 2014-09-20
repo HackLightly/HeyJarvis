@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#import "ActionHandler.h"
 #import <EZAudio/EZAudio.h>
 #import <AFNetworking/AFNetworking.h>
 #import <AVFoundation/AVFoundation.h>
@@ -30,6 +31,7 @@
 @property (nonatomic,strong) EZMicrophone *microphone;
 @property (nonatomic,strong) EZRecorder *recorder;
 @property (weak) IBOutlet NSWindow *window;
+@property (nonatomic,strong) ActionHandler *action;
 
 @end
 
@@ -45,7 +47,8 @@
         //[self toggleRecording:NO];
         
     });
-    
+    self.action = [[ActionHandler alloc] init];
+    //[self.action handleAction:nil];
 }
 
 #pragma mark - EZMicrophoneDelegate
