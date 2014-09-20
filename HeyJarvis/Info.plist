@@ -9,7 +9,7 @@
 	<key>CFBundleIconFile</key>
 	<string></string>
 	<key>CFBundleIdentifier</key>
-	<string>Akero-Software.$(PRODUCT_NAME:rfc1034identifier)</string>
+	<string>Akero-Software.$(PRODUCT_NAME:rfc1034identifier).com</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
