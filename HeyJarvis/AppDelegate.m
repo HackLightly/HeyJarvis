@@ -20,6 +20,7 @@
 
 @interface AppDelegate () <EZMicrophoneDelegate, NSUserNotificationCenterDelegate, NSApplicationDelegate, MicDelegate>{
     BOOL _hasSomethingToPlay;
+    BOOL listening;
     int secondTimeCount;
     float lastdbValue;
     NSUserNotification *notification;
@@ -44,6 +45,7 @@
     [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(checkForSound:) userInfo:nil repeats:YES];
     notification = [[NSUserNotification alloc] init];
     [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
+    listening = YES;
     
 }
 
@@ -125,10 +127,12 @@
 -(void)muteMic:(BOOL)mute{
     if (mute){
         [self.microphone stopFetchingAudio];
+        listening = NO;
         NSLog(@"Mic Mutted");
     } else {
-        NSLog(@"Mic Listening");
         [self.microphone startFetchingAudio];
+        listening = YES;
+        NSLog(@"Mic Listening");
     }
 }
 
@@ -236,6 +240,7 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 
 - (IBAction)calibrate:(id) sender {
     NSLog(@"calibrate");
+    
 }
 
 - (void) awakeFromNib{
