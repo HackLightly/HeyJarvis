@@ -45,7 +45,7 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     dbValueQueue = [[NSMutableArray alloc] init];
-    
+    [NSApp setActivationPolicy: NSApplicationActivationPolicyAccessory];
     self.microphone = [EZMicrophone microphoneWithDelegate:self];
     [self.microphone startFetchingAudio];
     [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(checkForSound:) userInfo:nil repeats:YES];
@@ -63,12 +63,16 @@
 }
 
 -(void)checkForSound:(NSTimer *) timer{
-    [dbValueQueue pushFloat:lastdbValue withMax:10];
+    if (!listening){
+        lastdbValue = 0.f;
+    } else {
+        [dbValueQueue pushFloat:lastdbValue withMax:10];
+    }
     NSLog(@"dbval:  %f ",lastdbValue);
     if (lastdbValue >= beginThreshold && !self.isRecording){
         notification.title = @"Jarvis";
         notification.informativeText = @"Listening...";
-        [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
+        //[[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
         [self toggleRecording:YES];
         secondTimeCount = 0;
         self.isRecording = YES;
@@ -125,9 +129,9 @@
         [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
         notification.title = @"Jarvis";
         notification.informativeText = object[@"msg_body"];
-        [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
+        //[[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
         //[sp startSpeakingString:object[@"msg_body"]];
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(4.f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
              [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
         });
 
@@ -144,37 +148,6 @@
         listening = YES;
         NSLog(@"Mic Listening");
     }
-}
-
-- (void)readCompleted:(NSNotification *)notification {
-    
-    NSLog(@"ENCODING/UPLOADING");
-   
-    NSData * data = [[NSData alloc ]initWithContentsOfFile:kAudioFilePathConvert];
-    NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://api.wit.ai/speech?v=20140508"]];
-    [req setHTTPMethod:@"POST"];
-    [req setCachePolicy:NSURLCacheStorageNotAllowed];
-    [req setTimeoutInterval:15.0];
-    [req setHTTPBody:data];
-    [req setValue:[NSString stringWithFormat:@"Bearer %@", @"EUOKNV6J5WMTO5TVFH5YB7UJZRAFQ3KD"] forHTTPHeaderField:@"Authorization"];
-    [req setValue:@"audio/mpeg3" forHTTPHeaderField:@"Content-type"];
-    [req setValue:@"application/json" forHTTPHeaderField:@"Accept"];
-    
-    // send HTTP request
-    NSURLResponse* response = nil;
-    NSError *error = nil;
-    NSData *data2 = [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:&error];
-    
-    NSError *serializationError;
-    NSDictionary *object = [NSJSONSerialization JSONObjectWithData:data2
-                                                           options:0
-                                                             error:&serializationError];
-    NSLog(@"Object %@", object);
-    
-    NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
-    [sp setVolume:100.0];
-    //[sp startSpeakingString:object[@"msg_body"]];
-    
 }
 
 -(void)toggleRecording:(BOOL)sender
@@ -234,17 +207,23 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 
 -(IBAction)about:(id)sender {
     NSLog(@"about");
-}
-
-- (IBAction)setEnable:(id)sender {
-    NSLog(@"setEnable");
-    [self muteMic:NO];
+    [self.aboutWindow makeKeyAndOrderFront:NSApp];
 }
 
 - (IBAction)setDisable:(id)sender {
-    NSLog(@"setDisable");
-    [self muteMic:YES];
-    lastdbValue = 0.0f;
+    
+    if (listening){
+        NSLog(@"setDisable");
+        [sender setState:1];
+        [self muteMic:YES];
+        listening = NO;
+    } else {
+        NSLog(@"setEnable");
+        [sender setState:0];
+        [self muteMic:NO];
+        listening = YES;
+    }
+
 }
 
 

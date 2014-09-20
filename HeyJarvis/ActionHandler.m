@@ -22,9 +22,14 @@
 #define MESSAGE 8
 #define MUSIC 9
 #define JOKE 10
-#define DEFAULT_SONG @"Call Me Maybe"
+#define STOP 11
+#define PLACEHOLDER_SONG @"92891230914290vnsar32uhf09ashr39h1od9"
 
-@interface ActionHandler () <NSSpeechSynthesizerDelegate>
+@interface ActionHandler () <NSSpeechSynthesizerDelegate> {
+    NSUserNotification *notification;
+}
+
+
 
 typedef NS_ENUM(NSInteger, IntentType) {
     IntentTypeTest,
@@ -38,6 +43,7 @@ typedef NS_ENUM(NSInteger, IntentType) {
 @implementation ActionHandler
 
 - (id) init {
+    notification = [[NSUserNotification alloc] init];
     return self;
 }
 
@@ -75,15 +81,14 @@ typedef NS_ENUM(NSInteger, IntentType) {
                     if ([songName rangeOfString:@"music"].location != NSNotFound ||
                         [songName rangeOfString:@"some music"].location != NSNotFound ||
                         [songName rangeOfString:@"tunes"].location != NSNotFound) {
-                        //play default song = Call Me Maybe
-                        songName = DEFAULT_SONG;
+                        songName = PLACEHOLDER_SONG;
                     }
                     [self playMusic:songName];
                 }
             }
         }
             break;
-        case LAUNCH: {
+        case LAUNCH: { //will not do anything if value is nil
             NSString *entities = [[witResponse valueForKey:@"outcome"] valueForKey:@"entities"];
             if (entities != nil) {
                 NSString *applicationJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"application"];
@@ -94,7 +99,7 @@ typedef NS_ENUM(NSInteger, IntentType) {
             }
         }
             break;
-        case SEARCH: {
+        case SEARCH: { //will not do anything if value is nil
             NSString *entities = [[witResponse valueForKey:@"outcome"] valueForKey:@"entities"];
             if (entities != nil) {
                 NSString *searchJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"search_query"];
@@ -103,6 +108,16 @@ typedef NS_ENUM(NSInteger, IntentType) {
                     [self  search:searchText];
                 }
             }
+        }
+            break;
+        case STOP: {
+            [self muteMicPLZ];
+        }
+            break;
+        
+        case WEATHER: {
+            [self muteMicPLZ];
+            [self sayWeather];
         }
             break;
     }
@@ -151,6 +166,9 @@ typedef NS_ENUM(NSInteger, IntentType) {
     else if ([intent isEqualToString:@"joke"]) {
         return JOKE;
     }
+    else if ([intent isEqualToString:@"stop"]) {
+        return STOP;
+    }
     
     return -1;
 }
@@ -192,14 +210,42 @@ typedef NS_ENUM(NSInteger, IntentType) {
     
     NSString *dateString = [format stringFromDate:now];
     [sp startSpeakingString:[NSString stringWithFormat:@"It's %@", dateString]];
+    [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
+    notification.title = @"Jarvis";
+    notification.informativeText = [NSString stringWithFormat:@"It's %@", dateString];
+    [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(4.f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
+    });
 }
+
+- (void) sayWeather
+{
+    NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
+    [sp setVolume:100.0];
+    sp.delegate = self;
+    
+    NSString *weatherString = [self getWeatherString:[self getWeatherInformation:@"Waterloo"]];
+    
+    [sp startSpeakingString:weatherString];
+}
+
 
 
 - (void) playMusic: (NSString*)song
 {
     NSString *path = [[NSBundle mainBundle] pathForResource:@"music" ofType:@"scpt"];
-    NSArray *args = @[song];
-    [self executeScriptWithPath:path function:@"play" andArguments:args];
+    NSArray *args;
+    NSString *func;
+    if ([song  isEqualToString:PLACEHOLDER_SONG]) {
+        args = nil;
+        func = @"playAny";
+    }
+    else {
+        args = @[song];
+        func = @"play";
+    }
+    [self executeScriptWithPath:path function:func andArguments:args];
 }
 
 - (void) launchApplication: (NSString*) application
@@ -307,6 +353,68 @@ typedef NS_ENUM(NSInteger, IntentType) {
     return executionSucceed;
 }
 
+- (NSDictionary*) makeGETRequest:(NSString *) url
+{
+    NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]];
+    [req setHTTPMethod:@"GET"];
+    [req setCachePolicy:NSURLCacheStorageNotAllowed];
+    [req setTimeoutInterval:15.0];
+    
+    // send HTTP request
+    NSURLResponse* response = nil;
+    NSError *error = nil;
+    NSData *data2 = [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:&error];
+    
+    NSError *serializationError;
+    NSDictionary *object = [NSJSONSerialization JSONObjectWithData:data2
+                                                           options:0
+                                                             error:&serializationError];
+    return object;
+}
+
+- (NSDictionary*) getWeatherInformation:(NSString *) locationQuery
+{
+    return [self makeGETRequest:
+            [NSString stringWithFormat:@"http://api.openweathermap.org/data/2.5/weather?units=metric&q=%@", locationQuery]];
+}
+
+- (NSString*) getWeatherDescriptionFromIcon:(NSString *) iconString
+{
+    NSString *description = @"It's";
+    
+    if ([iconString isEqualToString:@"01d"] || [iconString isEqualToString:@"01n"]) {
+        description = @"It's currently clear and";
+    }
+    else if ([iconString isEqualToString:@"02d"] || [iconString isEqualToString:@"02n"] ||
+             [iconString isEqualToString:@"03d"] || [iconString isEqualToString:@"03n"] ||
+             [iconString isEqualToString:@"04d"] || [iconString isEqualToString:@"04n"]) {
+        description = @"It's currently a little cloudy and";
+    }
+    else if ([iconString isEqualToString:@"09d"] || [iconString isEqualToString:@"09n"] ||
+             [iconString isEqualToString:@"10d"] || [iconString isEqualToString:@"10n"] ||
+             [iconString isEqualToString:@"11d"] || [iconString isEqualToString:@"11n"]) {
+        description = @"It's currently raining and";
+    }
+    else if ([iconString isEqualToString:@"13d"] || [iconString isEqualToString:@"13n"]) {
+        description = @"It's currently snowing and";
+    }
+    else if ([iconString isEqualToString:@"50d"] || [iconString isEqualToString:@"50n"]) {
+        description = @"It's currently foggy and";
+    }
+    
+    return description;
+}
+
+- (NSString*) getWeatherString:(NSDictionary*)weatherResponse
+{
+    NSString *icon = [[weatherResponse valueForKey:@"weather"][0] valueForKey:@"icon"];
+    NSString *conditions = [self getWeatherDescriptionFromIcon:icon];
+    
+    int temperature = (int) lroundf([[[weatherResponse valueForKey:@"main"] valueForKey:@"temp"] floatValue]);
+    NSLog(@"%d", temperature);
+    
+    return [NSString stringWithFormat:@"%@ %d degrees outside.", conditions, temperature];
+}
 
 
 @end
