@@ -248,7 +248,7 @@ withNumberOfChannels:(UInt32)numberOfChannels {
     
     //Allocates and loads the images into the application which will be used for our NSStatusItem
     statusImage = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"logo" ofType:@"png"]];
-    statusHighlightImage = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"logo" ofType:@"png"]];
+    statusHighlightImage = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"logo2" ofType:@"png"]];
     
     //Sets the images in our NSStatusItem
     [statusItem setImage:statusImage];
@@ -257,7 +257,7 @@ withNumberOfChannels:(UInt32)numberOfChannels {
     //Tells the NSStatusItem what menu to load
     [statusItem setMenu:statusMenu];
     //Sets the tooptip for our item
-    [statusItem setToolTip:@"My Custom Menu Item"];
+    [statusItem setToolTip:@"Jarvis"];
     //Enables highlighting
     [statusItem setHighlightMode:YES];
 }
