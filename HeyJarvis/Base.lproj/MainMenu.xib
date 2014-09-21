@@ -14,6 +14,7 @@
         <customObject id="Voe-Tx-rLC" customClass="AppDelegate">
             <connections>
                 <outlet property="aboutWindow" destination="CQt-zK-Dv6" id="rBI-d6-h7B"/>
+                <outlet property="disable" destination="CbQ-aE-h81" id="r3M-yS-TNL"/>
                 <outlet property="statusMenu" destination="VY3-qH-fmF" id="XKu-Fl-704"/>
             </connections>
         </customObject>
@@ -45,7 +46,7 @@
                     </connections>
                 </menuItem>
             </items>
-            <point key="canvasLocation" x="-0.5" y="140.5"/>
+            <point key="canvasLocation" x="-13.5" y="142.5"/>
         </menu>
         <window title="About" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" hidesOnDeactivate="YES" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="CQt-zK-Dv6" customClass="NSPanel">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" utility="YES"/>

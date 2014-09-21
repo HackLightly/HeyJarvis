@@ -170,11 +170,13 @@
 
 -(void)muteMic:(BOOL)mute{
     if (mute){
+        [disable setTitle:@"Test"];
         [self.microphone stopFetchingAudio];
         listening = NO;
         NSLog(@"Mic Mutted");
         [self changeStatus:3];
     } else {
+        [disable setState:0];
         [self.microphone startFetchingAudio];
         listening = YES;
         NSLog(@"Mic Listening");
@@ -260,7 +262,6 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 
 }
 
-
 - (IBAction)calibrate:(id) sender {
     NSLog(@"calibrate");
     NSDictionary* values = [dbValueQueue evaluate];
@@ -287,6 +288,7 @@ withNumberOfChannels:(UInt32)numberOfChannels {
     //Sets the images in our NSStatusItem
     [statusItem setImage:statusImage];
     //[statusItem setAlternateImage:statusHighlightImage];
+    
     
     //Tells the NSStatusItem what menu to load
     [statusItem setMenu:statusMenu];
