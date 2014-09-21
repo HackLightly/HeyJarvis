@@ -25,7 +25,8 @@
 #define MUSIC 9
 #define JOKE 10
 #define STOP 11
-#define PLACEHOLDER_SONG @"92891230914290vnsar32uhf09ashr39h1od9"
+#define PLACEHOLDER_SONG @"9289dsf3914290vnsar32uhf09ashr39h1od9"
+#define PLACEHOLDER_TIME 92719272
 
 @interface ActionHandler () <NSSpeechSynthesizerDelegate> {
     NSUserNotification *notification;
@@ -127,7 +128,49 @@
             [self sayDaySummary];
         }
             break;
+        case REMIND: {
+            NSString *entities = [[witResponse valueForKey:@"outcome"] valueForKey:@"entities"];
+            if (entities != nil) {
+                NSString *taskJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"task"];
+                if (taskJSON!= nil) {
+                    NSString *taskText = [[[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"task"] valueForKey:@"value"];
+                    NSString *timeText = nil;
+                    if (taskText != nil) {
+                        NSString  *timeJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"datetime"];
+                        double secondOffset = PLACEHOLDER_TIME;
+                        if (timeJSON != nil) {
+                            timeText = [[[[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"datetime"] valueForKey:@"value"] valueForKey:@"from"];
+//                            NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+//                            [dateFormat setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'AAAZ"];
+//                            NSDate *date = [dateFormat dateFromString:timeText];
+                            NSDate *dateFromText = [self parseWithDate:timeText];
+                            NSDate *dateNow = [NSDate date];
+                            double secondOffset1 = [dateFromText timeIntervalSince1970];
+                            double secondOffset2 = [dateNow timeIntervalSince1970];
+                            secondOffset = secondOffset1 - secondOffset2;
+                        }
+                        [self createReminder:taskText timeOffset:secondOffset];
+                    }
+                    //do nothing if there is no reminder(task) text
+                }
+            }
+        }
+            break;
     }
+}
+
+- (NSDate *)parseWithDate:(NSString *)dateString
+{
+    NSDateFormatter *rfc3339TimestampFormatterWithTimeZone = [[NSDateFormatter alloc] init];
+    [rfc3339TimestampFormatterWithTimeZone setLocale:[[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"] init]];
+    [rfc3339TimestampFormatterWithTimeZone setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.AAAZ"];
+    
+    NSDate *theDate = nil;
+    NSError *error = nil;
+    if (![rfc3339TimestampFormatterWithTimeZone getObjectValue:&theDate forString:dateString range:nil error:&error]) {
+        NSLog(@"Date '%@' could not be parsed: %@", dateString, error);
+    }
+    return theDate;
 }
 
 -(void)muteMicPLZ{
@@ -331,6 +374,19 @@
     NSArray *urlArg = @[formattedUrl];
     NSString *path = [[NSBundle mainBundle] pathForResource:@"search" ofType:@"scpt"];
     [self executeScriptWithPath:path function:@"openInSafari" andArguments:urlArg];
+}
+
+- (void) createReminder: (NSString*) task timeOffset:(double) seconds {
+    NSString *func = @"remind";
+    NSArray *arg = @[task];
+    if (seconds != 0 && seconds != PLACEHOLDER_TIME) {
+        func = @"remindWithTime";
+        arg = @[task, [NSString stringWithFormat:@"%d",seconds]];
+        NSLog(@"seconds: %f", seconds);
+    }
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"remind" ofType:@"scpt"];
+    [self executeScriptWithPath:path function:func andArguments:arg];
+
 }
 
 //taken from https://stackoverflow.com/questions/6963072/execute-applescript-from-cocoa-app-with-params
