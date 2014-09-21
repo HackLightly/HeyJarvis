@@ -287,8 +287,11 @@
     NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
     [sp setVolume:100.0];
     sp.delegate = self;
+    //NSDictionary *weatherInfo = [self getWeatherInformation:@"Waterloo"];
     
-    NSString *weatherString = [self getWeatherString:[self getWeatherInformation:@"Waterloo"]];
+    NSDictionary *weatherInfo = [self makeGETRequest:@"http://api.openweathermap.org/data/2.5/weather?units=metric&id=6176823"];
+    NSLog(@"%@", weatherInfo);
+    NSString *weatherString = [self getWeatherString:weatherInfo];
     
     [sp startSpeakingString:weatherString];
 }
