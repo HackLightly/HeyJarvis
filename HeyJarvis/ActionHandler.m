@@ -141,6 +141,9 @@
             break;
         case STOP: {
             [self muteMicPLZ];
+            NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
+            [sp setVolume:100.0];
+            [sp startSpeakingString:@"OK. I'll be waiting"];
         }
             break;
         
