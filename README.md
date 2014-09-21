@@ -26,7 +26,7 @@ Note: { } indicate optional commands
 Make sure you have LAME installed.  
 
 We recommend installing it using homebrew. 
-
+``` brew install lame ```
 ##Authors
 Developed by Hack Lightly
 
