@@ -30,6 +30,8 @@
     int currentFrame;
     NSTimer* animTimer;
     
+    BOOL animBool;
+    
     NSMutableArray *dbValueQueue;
     NSUserNotification *notification;
 }
@@ -280,18 +282,24 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 
 - (void)changeStatus: (int) status {
     currentFrame = 0;
-    if (animTimer) {
-        [animTimer invalidate];
-    }
+
     switch (status) {
         case -1: // Not listening
         {
+            if (animTimer) {
+                [animTimer invalidate];
+                animTimer = nil;
+            }
             NSImage* image = [NSImage imageNamed:@"disabledlogo.png"];
             [statusItem setImage:image];
         }
             break;
         case 0: // Normal, nothing
         {
+            if (animTimer) {
+                [animTimer invalidate];
+                animTimer = nil;
+            }
             NSImage* image = [NSImage imageNamed:@"logo.png"];
             [statusItem setImage:image];
         }
@@ -304,12 +312,14 @@ withNumberOfChannels:(UInt32)numberOfChannels {
             break;
         case 2: // Processing
         {
-             animTimer = [NSTimer scheduledTimerWithTimeInterval:1.0/2.0 target:self selector:@selector(updateProcessingImage:) userInfo:nil repeats:YES];
+            animBool = YES;
+            animTimer = [NSTimer scheduledTimerWithTimeInterval:1.0/2.0 target:self selector:@selector(updateProcessingImage:) userInfo:nil repeats:YES];
+  
         }
             break;
         case 3: // Speaking
         {
-             animTimer = [NSTimer scheduledTimerWithTimeInterval:1.0/2.0 target:self selector:@selector(updateProcessingImage:) userInfo:nil repeats:YES];
+            animBool = !animBool;
         }
             break;
         default:
@@ -320,17 +330,14 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 - (void)updateProcessingImage:(NSTimer*)timer
 {
     //get the image for the current frame
-    NSImage* image = [NSImage imageNamed:[NSString stringWithFormat:@"processing%d.png",currentFrame]];
-    [statusItem setImage:image];
-    currentFrame = (currentFrame + 1) % 3;
+    if (animBool) {
+        NSImage* image = [NSImage imageNamed:[NSString stringWithFormat:@"processing%d.png",currentFrame]];
+        [statusItem setImage:image];
+        currentFrame = (currentFrame + 1) % 3;
+    } else {
+        NSImage* image = [NSImage imageNamed:[NSString stringWithFormat:@"speaking%d.png",currentFrame]];
+        [statusItem setImage:image];
+        currentFrame = (currentFrame + 1) % 2;
+    }
 }
-
-- (void)updateSpeakingImage:(NSTimer*)timer
-{
-    //get the image for the current frame
-    NSImage* image = [NSImage imageNamed:[NSString stringWithFormat:@"speaking%d.png",currentFrame]];
-    [statusItem setImage:image];
-    currentFrame = (currentFrame + 1) % 2;
-}
-
 @end
