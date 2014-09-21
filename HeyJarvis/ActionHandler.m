@@ -12,6 +12,7 @@
 #import <AppKit/NSSpeechRecognizer.h>
 #import <EventKit/EKEventStore.h>
 #import <EventKit/EKEvent.h>
+#import <stdlib.h>
 
 #define GREETING 0
 #define DAY_SUMMARY 1
@@ -33,6 +34,9 @@
 }
 
 @property (nonatomic, strong) EKEventStore *store;
+@property (nonatomic, strong) NSArray *acknowledge;
+@property (nonatomic, strong) NSArray *jokes;
+@property (nonatomic, strong) NSArray *greetings;
 
 @end
 
@@ -46,6 +50,9 @@
             NSLog(@"Error %@:", error);
         }
     }];
+    self.acknowledge = [[NSArray alloc] initWithObjects:@"Got it!", @"OK!", @"Understood.", @"No problem.", @"Alright!", nil];
+    self.jokes = [[NSArray alloc] initWithObjects:@"Have you ever tried eating a clock? It's very time consuming.", @"Want to hear a joke backwards? Start laughing.", @"When is a door not a door? When it's ajar.", @"Did you hear about the ATM that got addicted to money? It suffered from withdrawals.", @"Why should you not write with a broken pencil? Because it's pointless.", nil];
+    self.greetings = [[NSArray alloc] initWithObjects: @"Mister Stark? Is that you?", @"Hello master! How can I help you today?", @"Good day to you.", @"Greetings.", @"Hello there. What can I do for you?", nil];
     return self;
 }
 
@@ -109,7 +116,10 @@
             if (entities != nil) {
                 NSString *applicationJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"application"];
                 if (applicationJSON != nil) {
+                    int index = [self getRandArrayIndex:self.acknowledge];
                     NSString *applicationName = [[[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"application"]valueForKey:@"value"];
+                    NSString *message = [NSString stringWithFormat:@"%@ Launching %@", self.acknowledge[index], applicationName];
+                    [self sayString:message];
                     [self launchApplication:applicationName];
                 }
             }
@@ -120,7 +130,10 @@
             if (entities != nil) {
                 NSString *searchJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"search_query"];
                 if (searchJSON != nil) {
+                    int index = [self getRandArrayIndex:self.acknowledge];
                     NSString *searchText = [[[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"search_query"]valueForKey:@"value"];
+                    NSString *message = [NSString stringWithFormat:@"%@ Searching for %@", self.acknowledge[index], searchText];
+                    [self sayString:message];
                     [self  search:searchText];
                 }
             }
@@ -163,6 +176,10 @@
                             double secondOffset2 = [dateNow timeIntervalSince1970];
                             secondOffset = secondOffset1 - secondOffset2;
                         }
+                        int index = [self getRandArrayIndex:self.acknowledge];
+                        NSString *message = [NSString stringWithFormat:@"%@ Reminder set.", self.acknowledge[index]];
+
+                        [self sayString:message];
                         [self createReminder:taskText timeOffset:secondOffset];
                     }
                     //do nothing if there is no reminder(task) text
@@ -239,19 +256,13 @@
 
 - (void) sayGreeting
 {
-    NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
-    sp.delegate = self;
-    [sp setVolume:100.0];
-    [sp startSpeakingString:@"Hello master! How can I help you today?"];
+    [self sayFromArray:self.greetings];
 }
 
 //a little something for fun!
 - (void) tellAJoke
 {
-    NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
-    sp.delegate = self;
-    [sp setVolume:100.0];
-    [sp startSpeakingString:@"My End User License does not cover jokes. Don't you have something better to do?"];
+    [self sayFromArray:self.jokes];
 }
 
 -(void)speechSynthesizer:(NSSpeechSynthesizer *)sender didFinishSpeaking:(BOOL)finishedSpeaking{
@@ -260,6 +271,26 @@
             [self.delegate muteMic:NO];
         }
     }
+}
+
+- (void) sayString:(NSString *) speak
+{
+    [self muteMicPLZ];
+    NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
+    sp.delegate = self;
+    [sp setVolume:100.0];
+    [sp startSpeakingString:speak];
+}
+
+- (void) sayFromArray:(NSArray *) speechOptions
+{
+    int index = [self getRandArrayIndex:speechOptions];
+    [self sayString:speechOptions[index]];
+}
+
+- (int) getRandArrayIndex:(NSArray *) speechOptions
+{
+    return arc4random_uniform([speechOptions count] - 1);
 }
 
 - (void) sayTime
