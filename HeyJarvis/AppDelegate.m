@@ -19,7 +19,7 @@
 #define kAudioFilePath [NSString stringWithFormat:@"%@%@",NSHomeDirectory(),@"/test.wav"]
 #define kAudioFilePathConvert [NSString stringWithFormat:@"%@%@",NSHomeDirectory(),@"/test.mp3"]
 
-@interface AppDelegate () <EZMicrophoneDelegate, NSUserNotificationCenterDelegate, NSApplicationDelegate, MicDelegate>{
+@interface AppDelegate () <EZMicrophoneDelegate, NSUserNotificationCenterDelegate, NSApplicationDelegate, MicDelegate, NSStreamDelegate>{
     BOOL _hasSomethingToPlay;
     BOOL listening;
     float beginThreshold;
@@ -28,7 +28,14 @@
     float lastdbValue;
     NSMutableArray *dbValueQueue;
     NSUserNotification *notification;
+    NSOutputStream *outStream;
+    NSInputStream *inStream;
+    BOOL cleanUP;
+    NSDate *start; // used to time requests
 }
+
+@property (atomic) NSOperationQueue* q;
+@property (atomic) BOOL requestEnding;
 
 @property (nonatomic,assign) BOOL isRecording;
 @property (nonatomic, strong) AFHTTPSessionManager *afHTTPSessionManager;
@@ -43,7 +50,27 @@
 
 @implementation AppDelegate
 
+@synthesize requestEnding, q;
+
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+    
+    q = [[NSOperationQueue alloc] init];
+    [q setMaxConcurrentOperationCount:1];
+    
+    CFWriteStreamRef writeStream;
+    CFReadStreamRef readStream;
+    readStream = NULL;
+    writeStream = NULL;
+    CFStreamCreateBoundPair(NULL, &readStream, &writeStream, 65536);
+    
+    // convert to NSStream and set as property
+    inStream = CFBridgingRelease(readStream);
+    outStream = CFBridgingRelease(writeStream);
+    
+    [outStream setDelegate:self];
+    [outStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+    [outStream open];
+    
     dbValueQueue = [[NSMutableArray alloc] init];
     [NSApp setActivationPolicy: NSApplicationActivationPolicyAccessory];
     self.microphone = [EZMicrophone microphoneWithDelegate:self];
@@ -56,6 +83,61 @@
     /* might want to calibrate on startup instead of this */
     beginThreshold = 3.0f;
     endThreshold = 1.5f;
+    
+    
+    NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://api.wit.ai/speech?v=20140508"]];
+    [req setHTTPMethod:@"POST"];
+    [req setCachePolicy:NSURLCacheStorageNotAllowed];
+    [req setTimeoutInterval:15.0];
+    [req setHTTPBodyStream:inStream];
+    [req setValue:[NSString stringWithFormat:@"Bearer %@", @"EUOKNV6J5WMTO5TVFH5YB7UJZRAFQ3KD"] forHTTPHeaderField:@"Authorization"];
+    [req setValue:@"audio/" forHTTPHeaderField:@"Content-type"];
+    [req setValue:@"chunked" forHTTPHeaderField:@"Transfer-encoding"];
+    [req setValue:@"application/json" forHTTPHeaderField:@"Accept"];
+    
+    [NSURLConnection sendAsynchronousRequest:req
+                                       queue:[NSOperationQueue mainQueue]
+                           completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
+                               
+                               NSError *serializationError;
+                               NSDictionary *object = [NSJSONSerialization JSONObjectWithData:data
+                                                                                      options:0
+                                                                                        error:&serializationError];
+                               NSLog(@"Object %@", object);
+                               self.action.delegate = self;
+                               [self.action handleAction:object];
+                               NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
+                               [sp setVolume:100.0];
+                               [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
+                               notification.title = @"Jarvis";
+                               notification.informativeText = object[@"msg_body"];
+                               //[[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
+                               //[sp startSpeakingString:object[@"msg_body"]];
+                               dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(4.f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                                   [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
+                               });
+                           }];
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5.f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self endRequest];
+    });
+    
+//    NSTask *task = [[NSTask alloc] init];
+//    [task setLaunchPath:@"/bin/bash"];
+//    task.arguments = @[@"-c", @"/usr/local/bin/lame -h -b 192 ~/test.wav ~/test.mp3"];
+//    NSPipe *outputPipe = [NSPipe pipe];
+//    [[outputPipe fileHandleForReading] readToEndOfFileInBackgroundAndNotify];
+//    [task setStandardOutput:outputPipe];
+//    [task launch];
+//    [task setTerminationHandler:^(NSTask *task) {
+//        NSLog(@"ENCODING/UPLOADING");
+//        
+//        //NSData * data = [[NSData alloc ]initWithContentsOfFile:kAudioFilePathConvert];
+//        
+//    }];
+
+    
+    
 }
 
 - (BOOL)userNotificationCenter:(NSUserNotificationCenter *)center shouldPresentNotification:(NSUserNotification *)notification{
@@ -63,6 +145,7 @@
 }
 
 -(void)checkForSound:(NSTimer *) timer{
+    return;
     if (!listening){
         lastdbValue = 0.f;
     } else {
@@ -176,6 +259,44 @@
     self.isRecording = sender;
 }
 
+-(NSData *)processBuffer: (AudioBufferList*) audioBufferList
+
+{
+    
+    AudioBuffer sourceBuffer = audioBufferList->mBuffers[0];
+    
+    // we check here if the input data byte size has changed
+    int currentBuffer =0;
+    int maxBuf = 800;
+    
+    NSMutableData *data=[[NSMutableData alloc] init];
+    // CMBlockBufferRef blockBuffer;
+    // CMSampleBufferGetAudioBufferListWithRetainedBlockBuffer(ref, NULL, &audioBufferList, sizeof(audioBufferList), NULL, NULL, 0, &blockBuffer);
+    // NSLog(@"%@",blockBuffer);
+    
+    
+    // audioBufferList->mBuffers[0].mData, audioBufferList->mBuffers[0].mDataByteSize
+    for( int y=0; y<audioBufferList->mNumberBuffers; y++ )
+    {
+        if (currentBuffer < maxBuf){
+            AudioBuffer audioBuff = audioBufferList->mBuffers[y];
+            Float32 *frame = (Float32*)audioBuff.mData;
+            
+            
+            [data appendBytes:frame length:audioBuff.mDataByteSize];
+            currentBuffer += audioBuff.mDataByteSize;
+        }
+        else{
+            break;
+        }
+        
+    }
+    
+    return data;
+    
+    // copy incoming audio data to the audio buffer (no need since we are not using playback)
+    //memcpy(inAudioBuffer.mData, audioBufferList->mBuffers[0].mData, audioBufferList->mBuffers[0].mDataByteSize);
+}
 
 #pragma mark - EZMicrophoneDelegate
 // Note that any callback that provides streamed audio data (like streaming microphone input) happens on a separate audio thread that should not be blocked. When we feed audio data into any of the UI components we need to explicity create a GCD block on the main thread to properly get the UI to work.
@@ -185,13 +306,74 @@
 withNumberOfChannels:(UInt32)numberOfChannels {
     // Getting audio data as an array of float buffer arrays. What does that mean? Because the audio is coming in as a stereo signal the data is split into a left and right channel. So buffer[0] corresponds to the float* data for the left channel while buffer[1] corresponds to the float* data for the right channel.
     
-    // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
-    dispatch_async(dispatch_get_main_queue(),^{
+    // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blo?cking that audio flow.
+    NSData *data = [NSData dataWithBytes:buffer[0] length:bufferSize];
+    
+
         // Decibel Calculation.
         lastdbValue = [EZAudio RMS:buffer[0] length:bufferSize]*100;
         
-    });
+
 }
+
+- (void) cleanUp {
+    cleanUP = YES;
+    NSLog(@"Cleaning up");
+    if (outStream) {
+        NSLog(@"Cleaning up output stream");
+        [outStream close];
+        [outStream removeFromRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+        outStream = nil;
+        inStream = nil;
+        
+        start = [NSDate date];
+    }
+    
+    [q cancelAllOperations];
+    [q setSuspended:NO];
+    
+}
+
+-(void)endRequest {
+    NSLog(@"Ending request");
+    requestEnding = YES;
+    if (q.operationCount <= 0) {
+        [self cleanUp];
+    }
+}
+
+// DELEGATE STREAM
+
+-(void)stream:(NSStream *)s handleEvent:(NSStreamEvent)eventCode {
+    switch (eventCode) {
+        case NSStreamEventOpenCompleted:
+            NSLog(@"Stream open completed");
+            break;
+        case NSStreamEventHasBytesAvailable:
+            NSLog(@"Stream has bytes available");
+            break;
+        case NSStreamEventHasSpaceAvailable:
+            if (s == outStream) {
+                            NSLog(@"outStream has space, resuming dispatch");
+                if ([q isSuspended]) {
+                    [q setSuspended:NO];
+                }
+            }
+            break;
+        case NSStreamEventErrorOccurred:
+            NSLog(@"Stream error occurred");
+            [self cleanUp];
+            break;
+        case NSStreamEventEndEncountered:
+            NSLog(@"Stream end encountered");
+            [self cleanUp];
+            break;
+        case NSStreamEventNone:
+            NSLog(@"Stream event none");
+            break;
+    }
+}
+
 
 // Append the microphone data coming as a AudioBufferList with the specified buffer size to the recorder
 -(void)microphone:(EZMicrophone *)microphone
@@ -199,9 +381,31 @@ withNumberOfChannels:(UInt32)numberOfChannels {
    withBufferSize:(UInt32)bufferSize
 withNumberOfChannels:(UInt32)numberOfChannels {
     // Getting audio data as a buffer list that can be directly fed into the EZRecorder. This is happening on the audio thread - any UI updating needs a GCD main queue block.
+    
+    //NSInputStream *instream = [[NSInputStream alloc] initWithFileAtPath:<#(NSString *)#>]
+    NSData *data = [NSData dataWithBytes:bufferList->mBuffers[0].mData length:bufferList->mBuffers[0].mDataByteSize];
+    if (cleanUP){
+        return;
+    }
+    [q addOperationWithBlock:^{
+        if (outStream) {
+            [q setSuspended:YES];
+            
+            NSLog(@"Uploading %u bytes", (unsigned int)[data length]);
+            [outStream write:[data bytes] maxLength:[data length]];
+        }
+        
+        NSUInteger cnt = q.operationCount;
+        NSLog(@"Operation count: %d", cnt);
+        if (requestEnding && cnt <= 1) {
+            [self cleanUp];
+        }
+    }];
     if( self.isRecording ){
         [self.recorder appendDataFromBufferList:bufferList
                                  withBufferSize:bufferSize];
+        
+
     }
 }
 
