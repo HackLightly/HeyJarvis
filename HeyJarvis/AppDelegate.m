@@ -89,7 +89,7 @@
         [self toggleRecording:YES];
         secondTimeCount = 0;
         self.isRecording = YES;
-    } else if (secondTimeCount > 4 && self.isRecording) {
+    } else if (secondTimeCount > 2 && self.isRecording) {
         self.isRecording = NO;
         secondTimeCount = 0;
         [self toggleRecording:NO];
@@ -159,10 +159,12 @@
 
 -(void)muteMic:(BOOL)mute{
     if (mute){
+        [disable setTitle:@"Test"];
         [self.microphone stopFetchingAudio];
         listening = NO;
         NSLog(@"Mic Mutted");
     } else {
+        [disable setState:0];
         [self.microphone startFetchingAudio];
         listening = YES;
         NSLog(@"Mic Listening");
@@ -245,7 +247,6 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 
 }
 
-
 - (IBAction)calibrate:(id) sender {
     NSLog(@"calibrate");
     NSDictionary* values = [dbValueQueue evaluate];
@@ -272,6 +273,7 @@ withNumberOfChannels:(UInt32)numberOfChannels {
     //Sets the images in our NSStatusItem
     [statusItem setImage:statusImage];
     [statusItem setAlternateImage:statusHighlightImage];
+    
     
     //Tells the NSStatusItem what menu to load
     [statusItem setMenu:statusMenu];
