@@ -74,6 +74,7 @@
     }
     NSLog(@"dbval:  %f ",lastdbValue);
     if (lastdbValue >= beginThreshold && !self.isRecording){
+        [self changeStatus:1];
         notification.title = @"Jarvis";
         notification.informativeText = @"Listening...";
         //[[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
@@ -81,6 +82,7 @@
         secondTimeCount = 0;
         self.isRecording = YES;
     } else if (secondTimeCount > 4 && self.isRecording) {
+        [self changeStatus:2];
         self.isRecording = NO;
         secondTimeCount = 0;
         [self toggleRecording:NO];
@@ -153,10 +155,12 @@
         [self.microphone stopFetchingAudio];
         listening = NO;
         NSLog(@"Mic Mutted");
+        [self changeStatus:3];
     } else {
         [self.microphone startFetchingAudio];
         listening = YES;
         NSLog(@"Mic Listening");
+        [self changeStatus:0];
     }
 }
 
@@ -226,11 +230,13 @@ withNumberOfChannels:(UInt32)numberOfChannels {
         NSLog(@"setDisable");
         [sender setState:1];
         [self muteMic:YES];
+        [self changeStatus:-1];
         listening = NO;
     } else {
         NSLog(@"setEnable");
         [sender setState:0];
         [self muteMic:NO];
+        [self changeStatus:0];
         listening = YES;
     }
 
@@ -298,12 +304,12 @@ withNumberOfChannels:(UInt32)numberOfChannels {
             break;
         case 2: // Processing
         {
-             animTimer = [NSTimer scheduledTimerWithTimeInterval:1.0/30.0 target:self selector:@selector(updateProcessingImage:) userInfo:nil repeats:YES];
+             animTimer = [NSTimer scheduledTimerWithTimeInterval:1.0/2.0 target:self selector:@selector(updateProcessingImage:) userInfo:nil repeats:YES];
         }
             break;
         case 3: // Speaking
         {
-             animTimer = [NSTimer scheduledTimerWithTimeInterval:1.0/30.0 target:self selector:@selector(updateSpeakingImage:) userInfo:nil repeats:YES];
+             animTimer = [NSTimer scheduledTimerWithTimeInterval:1.0/2.0 target:self selector:@selector(updateProcessingImage:) userInfo:nil repeats:YES];
         }
             break;
         default:

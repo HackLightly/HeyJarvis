@@ -10,8 +10,7 @@
 		1F10D50619CDD53B005E9B77 /* mainlogo128.png in Resources */ = {isa = PBXBuildFile; fileRef = 1F10D50419CDD53B005E9B77 /* mainlogo128.png */; };
 		1F10D50719CDD53B005E9B77 /* mainlogo256.png in Resources */ = {isa = PBXBuildFile; fileRef = 1F10D50519CDD53B005E9B77 /* mainlogo256.png */; };
 		1F10D50919CDD5A9005E9B77 /* mainlogo1024.png in Resources */ = {isa = PBXBuildFile; fileRef = 1F10D50819CDD5A9005E9B77 /* mainlogo1024.png */; };
-		1F19E3BD19CD4CD300A4446C /* logo2.png in Resources */ = {isa = PBXBuildFile; fileRef = 1F19E3BC19CD4CD300A4446C /* logo2.png */; };
-		1F19E3BF19CD4FAB00A4446C /* mainlog.png in Resources */ = {isa = PBXBuildFile; fileRef = 1F19E3BE19CD4FAB00A4446C /* mainlog.png */; };
+		1F19E3BF19CD4FAB00A4446C /* mainlogo.png in Resources */ = {isa = PBXBuildFile; fileRef = 1F19E3BE19CD4FAB00A4446C /* mainlogo.png */; };
 		1FDB811719CD2F0D00EFA8D9 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FDB811619CD2F0D00EFA8D9 /* main.m */; };
 		1FDB811A19CD2F0D00EFA8D9 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FDB811919CD2F0D00EFA8D9 /* AppDelegate.m */; };
 		1FDB811C19CD2F0D00EFA8D9 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1FDB811B19CD2F0D00EFA8D9 /* Images.xcassets */; };
@@ -23,8 +22,15 @@
 		429CA99519CDC7F700C0A696 /* music.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 429CA99419CDC7F700C0A696 /* music.scpt */; };
 		429CA99619CDC7F700C0A696 /* music.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 429CA99419CDC7F700C0A696 /* music.scpt */; };
 		6C85738D19CD52C0004D8B57 /* ActionHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 6C85738C19CD52C0004D8B57 /* ActionHandler.m */; };
-		F42B918519CD46B100E53CFE /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = F42B918419CD46B100E53CFE /* logo.png */; };
 		F42B918A19CDCD0600E53CFE /* NSMutableArray+Queue.m in Sources */ = {isa = PBXBuildFile; fileRef = F42B918919CDCD0600E53CFE /* NSMutableArray+Queue.m */; };
+		F4A509AE19CE836E0038BDE0 /* disabledlogo.png in Resources */ = {isa = PBXBuildFile; fileRef = F4A509A619CE836E0038BDE0 /* disabledlogo.png */; };
+		F4A509AF19CE836E0038BDE0 /* listenlogo.png in Resources */ = {isa = PBXBuildFile; fileRef = F4A509A719CE836E0038BDE0 /* listenlogo.png */; };
+		F4A509B019CE836E0038BDE0 /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = F4A509A819CE836E0038BDE0 /* logo.png */; };
+		F4A509B119CE836E0038BDE0 /* processing0.png in Resources */ = {isa = PBXBuildFile; fileRef = F4A509A919CE836E0038BDE0 /* processing0.png */; };
+		F4A509B219CE836E0038BDE0 /* processing1.png in Resources */ = {isa = PBXBuildFile; fileRef = F4A509AA19CE836E0038BDE0 /* processing1.png */; };
+		F4A509B319CE836E0038BDE0 /* processing2.png in Resources */ = {isa = PBXBuildFile; fileRef = F4A509AB19CE836E0038BDE0 /* processing2.png */; };
+		F4A509B419CE836E0038BDE0 /* speaking0.png in Resources */ = {isa = PBXBuildFile; fileRef = F4A509AC19CE836E0038BDE0 /* speaking0.png */; };
+		F4A509B519CE836E0038BDE0 /* speaking1.png in Resources */ = {isa = PBXBuildFile; fileRef = F4A509AD19CE836E0038BDE0 /* speaking1.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,8 +48,7 @@
 		1F10D50419CDD53B005E9B77 /* mainlogo128.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mainlogo128.png; sourceTree = "<group>"; };
 		1F10D50519CDD53B005E9B77 /* mainlogo256.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mainlogo256.png; sourceTree = "<group>"; };
 		1F10D50819CDD5A9005E9B77 /* mainlogo1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mainlogo1024.png; sourceTree = "<group>"; };
-		1F19E3BC19CD4CD300A4446C /* logo2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo2.png; sourceTree = "<group>"; };
-		1F19E3BE19CD4FAB00A4446C /* mainlog.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mainlog.png; sourceTree = "<group>"; };
+		1F19E3BE19CD4FAB00A4446C /* mainlogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mainlogo.png; sourceTree = "<group>"; };
 		1FDB811119CD2F0D00EFA8D9 /* HeyJarvis.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HeyJarvis.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1FDB811519CD2F0D00EFA8D9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1FDB811619CD2F0D00EFA8D9 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -60,9 +65,16 @@
 		6C85738B19CD52C0004D8B57 /* ActionHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActionHandler.h; sourceTree = "<group>"; };
 		6C85738C19CD52C0004D8B57 /* ActionHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActionHandler.m; sourceTree = "<group>"; };
 		C0E47413CBA341FF914F152F /* Pods-HeyJarvis.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HeyJarvis.xcconfig"; path = "Pods/Pods-HeyJarvis.xcconfig"; sourceTree = "<group>"; };
-		F42B918419CD46B100E53CFE /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
 		F42B918819CDCD0600E53CFE /* NSMutableArray+Queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableArray+Queue.h"; sourceTree = "<group>"; };
 		F42B918919CDCD0600E53CFE /* NSMutableArray+Queue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableArray+Queue.m"; sourceTree = "<group>"; };
+		F4A509A619CE836E0038BDE0 /* disabledlogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = disabledlogo.png; path = jarvisassets/disabledlogo.png; sourceTree = "<group>"; };
+		F4A509A719CE836E0038BDE0 /* listenlogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = listenlogo.png; path = jarvisassets/listenlogo.png; sourceTree = "<group>"; };
+		F4A509A819CE836E0038BDE0 /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = logo.png; path = jarvisassets/logo.png; sourceTree = "<group>"; };
+		F4A509A919CE836E0038BDE0 /* processing0.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = processing0.png; path = jarvisassets/processing0.png; sourceTree = "<group>"; };
+		F4A509AA19CE836E0038BDE0 /* processing1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = processing1.png; path = jarvisassets/processing1.png; sourceTree = "<group>"; };
+		F4A509AB19CE836E0038BDE0 /* processing2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = processing2.png; path = jarvisassets/processing2.png; sourceTree = "<group>"; };
+		F4A509AC19CE836E0038BDE0 /* speaking0.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = speaking0.png; path = jarvisassets/speaking0.png; sourceTree = "<group>"; };
+		F4A509AD19CE836E0038BDE0 /* speaking1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = speaking1.png; path = jarvisassets/speaking1.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -161,9 +173,15 @@
 		F42B918319CD45D500E53CFE /* Icons */ = {
 			isa = PBXGroup;
 			children = (
-				F42B918419CD46B100E53CFE /* logo.png */,
-				1F19E3BC19CD4CD300A4446C /* logo2.png */,
-				1F19E3BE19CD4FAB00A4446C /* mainlog.png */,
+				F4A509A619CE836E0038BDE0 /* disabledlogo.png */,
+				F4A509A719CE836E0038BDE0 /* listenlogo.png */,
+				F4A509A819CE836E0038BDE0 /* logo.png */,
+				F4A509A919CE836E0038BDE0 /* processing0.png */,
+				F4A509AA19CE836E0038BDE0 /* processing1.png */,
+				F4A509AB19CE836E0038BDE0 /* processing2.png */,
+				F4A509AC19CE836E0038BDE0 /* speaking0.png */,
+				F4A509AD19CE836E0038BDE0 /* speaking1.png */,
+				1F19E3BE19CD4FAB00A4446C /* mainlogo.png */,
 				1F10D50419CDD53B005E9B77 /* mainlogo128.png */,
 				1F10D50519CDD53B005E9B77 /* mainlogo256.png */,
 				1F10D50819CDD5A9005E9B77 /* mainlogo1024.png */,
@@ -253,17 +271,23 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1F19E3BF19CD4FAB00A4446C /* mainlog.png in Resources */,
+				F4A509AE19CE836E0038BDE0 /* disabledlogo.png in Resources */,
+				F4A509AF19CE836E0038BDE0 /* listenlogo.png in Resources */,
+				F4A509B419CE836E0038BDE0 /* speaking0.png in Resources */,
+				1F19E3BF19CD4FAB00A4446C /* mainlogo.png in Resources */,
+				F4A509B119CE836E0038BDE0 /* processing0.png in Resources */,
 				429CA99319CDA4BD00C0A696 /* search.scpt in Resources */,
 				1FDB811C19CD2F0D00EFA8D9 /* Images.xcassets in Resources */,
+				F4A509B519CE836E0038BDE0 /* speaking1.png in Resources */,
 				1F10D50719CDD53B005E9B77 /* mainlogo256.png in Resources */,
 				1F10D50919CDD5A9005E9B77 /* mainlogo1024.png in Resources */,
+				F4A509B219CE836E0038BDE0 /* processing1.png in Resources */,
+				F4A509B319CE836E0038BDE0 /* processing2.png in Resources */,
 				429CA99519CDC7F700C0A696 /* music.scpt in Resources */,
+				F4A509B019CE836E0038BDE0 /* logo.png in Resources */,
 				1FDB811F19CD2F0D00EFA8D9 /* MainMenu.xib in Resources */,
-				F42B918519CD46B100E53CFE /* logo.png in Resources */,
 				1F10D50619CDD53B005E9B77 /* mainlogo128.png in Resources */,
 				429CA99119CD8FF800C0A696 /* launch.scpt in Resources */,
-				1F19E3BD19CD4CD300A4446C /* logo2.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
