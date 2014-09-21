@@ -291,6 +291,7 @@
 				429CA99B19CE665200C0A696 /* launch.scpt in Resources */,
 				429CA9A419CE66BA00C0A696 /* search.scpt in Resources */,
 				429CA9B019CE759600C0A696 /* remind.scpt in Resources */,
+				1F19E3BD19CD4CD300A4446C /* logo2.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
