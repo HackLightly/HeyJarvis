@@ -10,6 +10,8 @@
 #import "ActionHandler.h"
 #import "AppDelegate.h"
 #import <AppKit/NSSpeechRecognizer.h>
+#import <EventKit/EKEventStore.h>
+#import <EventKit/EKEvent.h>
 
 #define GREETING 0
 #define DAY_SUMMARY 1
@@ -23,20 +25,14 @@
 #define MUSIC 9
 #define JOKE 10
 #define STOP 11
-#define PLACEHOLDER_SONG @"92891230914290vnsar32uhf09ashr39h1od9"
+#define PLACEHOLDER_SONG @"9289dsf3914290vnsar32uhf09ashr39h1od9"
+#define PLACEHOLDER_TIME 92719272
 
 @interface ActionHandler () <NSSpeechSynthesizerDelegate> {
     NSUserNotification *notification;
 }
 
-
-
-typedef NS_ENUM(NSInteger, IntentType) {
-    IntentTypeTest,
-
-};
-
-@property (nonatomic, strong) NSDictionary *intentTypes;
+@property (nonatomic, strong) EKEventStore *store;
 
 @end
 
@@ -44,14 +40,34 @@ typedef NS_ENUM(NSInteger, IntentType) {
 
 - (id) init {
     notification = [[NSUserNotification alloc] init];
+    self.store = [[EKEventStore alloc] init];
+    [self.store requestAccessToEntityType:EKEntityTypeEvent completion:^(BOOL granted, NSError *error) {
+        if (error){
+            NSLog(@"Error %@:", error);
+        }
+    }];
     return self;
 }
 
 // Main entry point to action handler - pass in the response dictionary
 - (void) handleAction:(NSDictionary *)witResponse
 {
+    //Guard against nil API response
+    if (witResponse == nil) {
+        return;
+    }
+    
+    //Check confidence threshold
+    NSDictionary *outcome = [witResponse valueForKey:@"outcome"];
+    double intentConfidence = [[outcome valueForKey:@"confidence"] doubleValue];
+    
+    //Guard against bad input
+    if (intentConfidence < 0.5) {
+        NSLog(@"Skipped intent: %@ due to low confidence: %@", [outcome valueForKey:@"intent"], [outcome valueForKey:@"confidence"]);
+        return;
+    }
+    
     // Parse dictionary to get intent and entities
-    NSLog(@"Handle Action Called");
     int intentID = [self decodeIntent:witResponse];
     
     // Dispatch action
@@ -120,7 +136,55 @@ typedef NS_ENUM(NSInteger, IntentType) {
             [self sayWeather];
         }
             break;
+        
+        case DAY_SUMMARY: {
+            [self muteMicPLZ];
+            [self sayDaySummary];
+        }
+            break;
+        case REMIND: {
+            NSString *entities = [[witResponse valueForKey:@"outcome"] valueForKey:@"entities"];
+            if (entities != nil) {
+                NSString *taskJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"task"];
+                if (taskJSON!= nil) {
+                    NSString *taskText = [[[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"task"] valueForKey:@"value"];
+                    NSString *timeText = nil;
+                    if (taskText != nil) {
+                        NSString  *timeJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"datetime"];
+                        double secondOffset = PLACEHOLDER_TIME;
+                        if (timeJSON != nil) {
+                            timeText = [[[[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"datetime"] valueForKey:@"value"] valueForKey:@"from"];
+//                            NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+//                            [dateFormat setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'AAAZ"];
+//                            NSDate *date = [dateFormat dateFromString:timeText];
+                            NSDate *dateFromText = [self parseWithDate:timeText];
+                            NSDate *dateNow = [NSDate date];
+                            double secondOffset1 = [dateFromText timeIntervalSince1970];
+                            double secondOffset2 = [dateNow timeIntervalSince1970];
+                            secondOffset = secondOffset1 - secondOffset2;
+                        }
+                        [self createReminder:taskText timeOffset:secondOffset];
+                    }
+                    //do nothing if there is no reminder(task) text
+                }
+            }
+        }
+            break;
     }
+}
+
+- (NSDate *)parseWithDate:(NSString *)dateString
+{
+    NSDateFormatter *rfc3339TimestampFormatterWithTimeZone = [[NSDateFormatter alloc] init];
+    [rfc3339TimestampFormatterWithTimeZone setLocale:[[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"] init]];
+    [rfc3339TimestampFormatterWithTimeZone setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.AAAZ"];
+    
+    NSDate *theDate = nil;
+    NSError *error = nil;
+    if (![rfc3339TimestampFormatterWithTimeZone getObjectValue:&theDate forString:dateString range:nil error:&error]) {
+        NSLog(@"Date '%@' could not be parsed: %@", dateString, error);
+    }
+    return theDate;
 }
 
 -(void)muteMicPLZ{
@@ -204,8 +268,7 @@ typedef NS_ENUM(NSInteger, IntentType) {
     [sp setVolume:100.0];
      sp.delegate = self;
     NSDateFormatter *format = [[NSDateFormatter alloc] init];
-    [format setDateFormat:@"HH:mm a"];
-
+     [format setDateFormat:@"hh:mm a"];
     NSDate *now = [[NSDate alloc] init];
     
     NSString *dateString = [format stringFromDate:now];
@@ -230,7 +293,71 @@ typedef NS_ENUM(NSInteger, IntentType) {
     [sp startSpeakingString:weatherString];
 }
 
+- (void) sayDaySummary
+{
+    NSArray *events = [[NSArray alloc] initWithArray:[self getEvents]];
+    NSString *weatherString = [self getWeatherString:[self getWeatherInformation:@"Waterloo"]];
+    NSString *eventsString;
+    NSString *eventsDescriptor;
+    
+    unsigned long eventsCount = [events count];
+    
+    if (eventsCount < 1) {
+        // No events
+        eventsString = @"You have no more events scheduled for today.";
+    }
+    else if (eventsCount == 1) {
+        eventsString = @"You have one more event scheduled for today.";
+    }
+    else {
+        // More than one event
+        eventsString = [NSString stringWithFormat:@"You have %lu more events scheduled for today.", eventsCount];
+    }
+    
+    if (eventsCount >= 1) {
+        EKEvent *nextEvent = events[0];
+        NSDateFormatter *format = [[NSDateFormatter alloc] init];
+        [format setDateFormat:@"hh:mm a"];
+        
+        NSString *eventTime = [format stringFromDate:[nextEvent startDate]];
+        
+        eventsString = [NSString stringWithFormat:@"%@ Your next event is: %@, at %@", eventsString, [nextEvent title], eventTime];
+    }
+    
+    if (eventsCount <= 2) {
+        eventsDescriptor = @"The rest of your day is looking pretty good!";
+    }
+    else {
+        eventsDescriptor = @"It seems like you have a busy day ahead of you.";
+    }
+    
+    NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
+    [sp setVolume:100.0];
+    sp.delegate = self;
+    
+    [sp startSpeakingString:[NSString stringWithFormat:@"%@ %@ %@", eventsDescriptor, weatherString, eventsString]];
+}
 
+- (NSArray*) getEvents
+{
+    // Get the appropriate calendar
+    NSCalendar *calendar = [NSCalendar autoupdatingCurrentCalendar]; //calwithid -> caltimezone
+    NSDate *rightNow = [NSDate date];
+    
+    NSTimeZone* sourceTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"EST"];
+    //[NSTimeZone setDefaultTimeZone:sourceTimeZone];
+    [calendar setTimeZone:sourceTimeZone];
+    
+    NSDate *endOfDay = [calendar dateBySettingHour:23 minute:59 second:59 ofDate:rightNow options:NSCalendarMatchStrictly];
+    
+    // Create the predicate from the event store's instance method
+    NSPredicate *predicate = [self.store predicateForEventsWithStartDate:rightNow
+                                                            endDate:endOfDay
+                                                          calendars:nil];
+    NSLog(@"right now: %@ end: %@",rightNow, endOfDay);
+    // Fetch all events that match the predicate
+    return [[self.store eventsMatchingPredicate:predicate] sortedArrayUsingSelector:@selector(compareStartDateWithEvent:)];
+}
 
 - (void) playMusic: (NSString*)song
 {
@@ -261,6 +388,19 @@ typedef NS_ENUM(NSInteger, IntentType) {
     NSArray *urlArg = @[formattedUrl];
     NSString *path = [[NSBundle mainBundle] pathForResource:@"search" ofType:@"scpt"];
     [self executeScriptWithPath:path function:@"openInSafari" andArguments:urlArg];
+}
+
+- (void) createReminder: (NSString*) task timeOffset:(double) seconds {
+    NSString *func = @"remind";
+    NSArray *arg = @[task];
+    if (seconds != 0 && seconds != PLACEHOLDER_TIME) {
+        func = @"remindWithTime";
+        arg = @[task, [NSString stringWithFormat:@"%d",seconds]];
+        NSLog(@"seconds: %f", seconds);
+    }
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"remind" ofType:@"scpt"];
+    [self executeScriptWithPath:path function:func andArguments:arg];
+
 }
 
 //taken from https://stackoverflow.com/questions/6963072/execute-applescript-from-cocoa-app-with-params

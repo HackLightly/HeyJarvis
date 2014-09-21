@@ -25,6 +25,7 @@
     float beginThreshold;
     float endThreshold;
     int secondTimeCount;
+    int counter;
     float lastdbValue;
     
     int currentFrame;
@@ -58,11 +59,23 @@
     notification = [[NSUserNotification alloc] init];
     [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
     listening = YES;
-    
+    [NSTimer scheduledTimerWithTimeInterval:1.f target:self selector:@selector(countUpToTen) userInfo:nil repeats:YES];
     /* might want to calibrate on startup instead of this */
     beginThreshold = 3.0f;
     endThreshold = 1.5f;
 }
+
+-(void)countUpToTen{
+    if (counter >= 10 && self.isRecording){
+        counter = 0;
+        [self toggleRecording:NO];
+    } else if (self.isRecording){
+        counter++;
+    } else {
+        return;
+    }
+}
+
 
 - (BOOL)userNotificationCenter:(NSUserNotificationCenter *)center shouldPresentNotification:(NSUserNotification *)notification{
     return YES;
@@ -99,6 +112,7 @@
     if (self.recorder){
         [self.recorder closeAudioFile];
     }
+   
     NSTask *task = [[NSTask alloc] init];
     [task setLaunchPath:@"/bin/bash"];
     task.arguments = @[@"-c", @"/usr/local/bin/lame -h -b 192 ~/test.wav ~/test.mp3"];
@@ -119,29 +133,28 @@
         [req setValue:@"audio/mpeg3" forHTTPHeaderField:@"Content-type"];
         [req setValue:@"application/json" forHTTPHeaderField:@"Accept"];
         
-        // send HTTP request
-        NSURLResponse* response = nil;
-        NSError *error = nil;
-        NSData *data2 = [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:&error];
-        
-        NSError *serializationError;
-        NSDictionary *object = [NSJSONSerialization JSONObjectWithData:data2
-                                                               options:0
-                                                                 error:&serializationError];
-        NSLog(@"Object %@", object);
-        self.action.delegate = self;
-        [self.action handleAction:object];
-        NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
-        [sp setVolume:100.0];
-        [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
-        notification.title = @"Jarvis";
-        notification.informativeText = object[@"msg_body"];
-        //[[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
-        //[sp startSpeakingString:object[@"msg_body"]];
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(4.f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-             [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
-        });
-
+        [NSURLConnection sendAsynchronousRequest:req
+                                           queue:[NSOperationQueue mainQueue]
+                               completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
+                                   
+                                   NSError *serializationError;
+                                   NSDictionary *object = [NSJSONSerialization JSONObjectWithData:data
+                                                                                          options:0
+                                                                                            error:&serializationError];
+                                   NSLog(@"Object %@", object);
+                                   self.action.delegate = self;
+                                   [self.action handleAction:object];
+                                   NSSpeechSynthesizer *sp = [[NSSpeechSynthesizer alloc] init];
+                                   [sp setVolume:100.0];
+                                   [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
+                                   notification.title = @"Jarvis";
+                                   notification.informativeText = object[@"msg_body"];
+                                   //[[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
+                                   //[sp startSpeakingString:object[@"msg_body"]];
+                                   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(4.f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                                       [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
+                                   });
+                               }];
     }];
 }
 
@@ -172,7 +185,7 @@
     {
         case NO:{
             [self.recorder closeAudioFile];
-            [self performSelectorInBackground:@selector(convertFile) withObject:nil];
+            [self convertFile];
         }
             break;
         case YES:
