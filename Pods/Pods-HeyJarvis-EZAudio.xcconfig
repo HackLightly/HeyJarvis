@@ -1,1 +1,0 @@
-PODS_HEYJARVIS_EZAUDIO_OTHER_LDFLAGS = -framework AudioToolbox -framework AudioUnit -framework CoreAudio -framework GLKit -framework OpenGL -framework QuartzCore
