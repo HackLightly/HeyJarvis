@@ -51,8 +51,22 @@
 // Main entry point to action handler - pass in the response dictionary
 - (void) handleAction:(NSDictionary *)witResponse
 {
+    //Guard against nil API response
+    if (witResponse == nil) {
+        return;
+    }
+    
+    //Check confidence threshold
+    NSDictionary *outcome = [witResponse valueForKey:@"outcome"];
+    double intentConfidence = [[outcome valueForKey:@"confidence"] doubleValue];
+    
+    //Guard against bad input
+    if (intentConfidence < 0.5) {
+        NSLog(@"Skipped intent: %@ due to low confidence: %@", [outcome valueForKey:@"intent"], [outcome valueForKey:@"confidence"]);
+        return;
+    }
+    
     // Parse dictionary to get intent and entities
-    NSLog(@"Handle Action Called");
     int intentID = [self decodeIntent:witResponse];
     
     // Dispatch action
