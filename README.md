@@ -23,10 +23,8 @@ Note: { } indicate optional commands
 8. Music: "Play some music", "Play Call Me Maybe", etc.
 
 ##Installation
-Make sure you have LAME installed.  
+Download the [HeyJarvis.app](https://github.com/HackLightly/HeyJarvis/raw/master/HeyJarvis.zip) file, and drag it into your application folder. 
 
-We recommend installing it using homebrew. 
-``` brew install lame ```
 ##Authors
 Developed by Hack Lightly
 
