@@ -330,7 +330,7 @@
 - (void) sayDaySummary
 {
     NSArray *events = [[NSArray alloc] initWithArray:[self getEvents]];
-    NSString *weatherString = [self getWeatherString:[self getWeatherInformation:@"Waterloo"]];
+    NSString *weatherString = [self getWeatherString:[self makeGETRequest:@"http://api.openweathermap.org/data/2.5/weather?units=metric&id=6176823"]];
     NSString *eventsString;
     NSString *eventsDescriptor;
     
