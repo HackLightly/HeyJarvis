@@ -25,6 +25,7 @@
     float beginThreshold;
     float endThreshold;
     int secondTimeCount;
+    int counter;
     float lastdbValue;
     NSMutableArray *dbValueQueue;
     NSUserNotification *notification;
@@ -52,11 +53,23 @@
     notification = [[NSUserNotification alloc] init];
     [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
     listening = YES;
-    
+    [NSTimer scheduledTimerWithTimeInterval:1.f target:self selector:@selector(countUpToTen) userInfo:nil repeats:YES];
     /* might want to calibrate on startup instead of this */
     beginThreshold = 3.0f;
     endThreshold = 1.5f;
 }
+
+-(void)countUpToTen{
+    if (counter >= 10 && self.isRecording){
+        counter = 0;
+        [self toggleRecording:NO];
+    } else if (self.isRecording){
+        counter++;
+    } else {
+        return;
+    }
+}
+
 
 - (BOOL)userNotificationCenter:(NSUserNotificationCenter *)center shouldPresentNotification:(NSUserNotification *)notification{
     return YES;
