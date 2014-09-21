@@ -136,6 +136,9 @@
         [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
         notification.title = @"Jarvis";
         notification.informativeText = object[@"msg_body"];
+        if ([object[@"msg_body"] length] == 0) {
+            [self changeStatus:0];
+        }
         //[[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
         //[sp startSpeakingString:object[@"msg_body"]];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(4.f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -306,20 +309,25 @@ withNumberOfChannels:(UInt32)numberOfChannels {
             break;
         case 1: // Listening
         {
+            if (animTimer) {
+                [animTimer invalidate];
+                animTimer = nil;
+            }
             NSImage* image = [NSImage imageNamed:@"listenlogo.png"];
             [statusItem setImage:image];
         }
             break;
         case 2: // Processing
         {
-            animBool = YES;
-            animTimer = [NSTimer scheduledTimerWithTimeInterval:1.0/2.0 target:self selector:@selector(updateProcessingImage:) userInfo:nil repeats:YES];
-  
+            if (!animTimer) {
+                animBool = YES;
+                animTimer = [NSTimer scheduledTimerWithTimeInterval:1.0/2.0 target:self selector:@selector(updateProcessingImage:) userInfo:nil repeats:YES];
+            }
         }
             break;
         case 3: // Speaking
         {
-            animBool = !animBool;
+            animBool = NO;
         }
             break;
         default:

@@ -246,6 +246,7 @@ typedef NS_ENUM(NSInteger, IntentType) {
         func = @"play";
     }
     [self executeScriptWithPath:path function:func andArguments:args];
+    [self.delegate muteMic:NO];
 }
 
 - (void) launchApplication: (NSString*) application
