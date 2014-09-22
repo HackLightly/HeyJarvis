@@ -136,7 +136,9 @@
         [NSURLConnection sendAsynchronousRequest:req
                                            queue:[NSOperationQueue mainQueue]
                                completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
-                                   
+                                   if (!data){
+                                       return;
+                                   }
                                    NSError *serializationError;
                                    NSDictionary *object = [NSJSONSerialization JSONObjectWithData:data
                                                                                           options:0
