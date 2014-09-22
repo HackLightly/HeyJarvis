@@ -96,10 +96,10 @@
         }
             break;
         case MUSIC: {
-            NSString *entities = [[witResponse valueForKey:@"outcome"] valueForKey:@"entities"];
-            if (entities != nil) {
-                NSString *songJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"song"];
-                if (songJSON != nil) {
+            id entities = [[witResponse valueForKey:@"outcome"] valueForKey:@"entities"];
+            if (entities != [NSNull null]) {
+                id songJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"song"];
+                if (songJSON != [NSNull null]) {
                     NSString *songName = [[[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"song"]valueForKey:@"value"];
                     if ([songName rangeOfString:@"music"].location != NSNotFound ||
                         [songName rangeOfString:@"some music"].location != NSNotFound ||
@@ -112,10 +112,10 @@
         }
             break;
         case LAUNCH: { //will not do anything if value is nil
-            NSString *entities = [[witResponse valueForKey:@"outcome"] valueForKey:@"entities"];
-            if (entities != nil) {
-                NSString *applicationJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"application"];
-                if (applicationJSON != nil) {
+            id entities = [[witResponse valueForKey:@"outcome"] valueForKey:@"entities"];
+            if (entities != [NSNull null]) {
+                id applicationJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"application"];
+                if (applicationJSON != [NSNull null]) {
                     int index = [self getRandArrayIndex:self.acknowledge];
                     NSString *applicationName = [[[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"application"]valueForKey:@"value"];
                     NSString *message = [NSString stringWithFormat:@"%@ Launching %@", self.acknowledge[index], applicationName];
@@ -126,10 +126,10 @@
         }
             break;
         case SEARCH: { //will not do anything if value is nil
-            NSString *entities = [[witResponse valueForKey:@"outcome"] valueForKey:@"entities"];
-            if (entities != nil) {
-                NSString *searchJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"search_query"];
-                if (searchJSON != nil) {
+            id entities = [[witResponse valueForKey:@"outcome"] valueForKey:@"entities"];
+            if (entities != [NSNull null]) {
+                id searchJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"search_query"];
+                if (searchJSON != [NSNull null]) {
                     int index = [self getRandArrayIndex:self.acknowledge];
                     NSString *searchText = [[[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"search_query"]valueForKey:@"value"];
                     NSString *message = [NSString stringWithFormat:@"%@ Searching for %@", self.acknowledge[index], searchText];
@@ -159,16 +159,16 @@
         }
             break;
         case REMIND: {
-            NSString *entities = [[witResponse valueForKey:@"outcome"] valueForKey:@"entities"];
-            if (entities != nil) {
-                NSString *taskJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"task"];
-                if (taskJSON!= nil) {
-                    NSString *taskText = [[[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"task"] valueForKey:@"value"];
+            id entities = [[witResponse valueForKey:@"outcome"] valueForKey:@"entities"];
+            if (entities != [NSNull null]) {
+                id taskJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"task"];
+                if (taskJSON != [NSNull null]) {
+                    id taskText = [[[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"task"] valueForKey:@"value"];
                     NSString *timeText = nil;
-                    if (taskText != nil) {
-                        NSString  *timeJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"datetime"];
+                    if (taskText != [NSNull null]) {
+                        id  timeJSON = [[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"datetime"];
                         double secondOffset = PLACEHOLDER_TIME;
-                        if (timeJSON != nil) {
+                        if (timeJSON != [NSNull null]) {
                             timeText = [[[[[witResponse valueForKey:@"outcome"] valueForKey:@"entities"] valueForKey:@"datetime"] valueForKey:@"value"] valueForKey:@"from"];
 //                            NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
 //                            [dateFormat setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'AAAZ"];
