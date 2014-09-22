@@ -16,7 +16,7 @@
 #import "NSMutableArray+Queue.h"
 
 
-#define kAudioFilePath [NSString stringWithFormat:@"%@%@",NSHomeDirectory(),@"/test.wav"]
+#define kAudioFilePath [NSString stringWithFormat:@"%@%@",NSHomeDirectory(),@"/jarvis_speech.wav"]
 #define kAudioFilePathConvert [NSString stringWithFormat:@"%@%@",NSHomeDirectory(),@"/test.mp3"]
 
 @interface AppDelegate () <EZMicrophoneDelegate, NSUserNotificationCenterDelegate, NSApplicationDelegate, MicDelegate>{
@@ -113,24 +113,24 @@
         [self.recorder closeAudioFile];
     }
    
-    NSTask *task = [[NSTask alloc] init];
-    [task setLaunchPath:@"/bin/bash"];
-    task.arguments = @[@"-c", @"/usr/local/bin/lame -h -b 192 ~/test.wav ~/test.mp3"];
-    NSPipe *outputPipe = [NSPipe pipe];
-    [[outputPipe fileHandleForReading] readToEndOfFileInBackgroundAndNotify];
-    [task setStandardOutput:outputPipe];
-    [task launch];
-    [task setTerminationHandler:^(NSTask *task) {
+//    NSTask *task = [[NSTask alloc] init];
+//    [task setLaunchPath:@"/bin/bash"];
+//    task.arguments = @[@"-c", @"/usr/local/bin/lame -h -b 192 ~/test.wav ~/test.mp3"];
+//    NSPipe *outputPipe = [NSPipe pipe];
+//    [[outputPipe fileHandleForReading] readToEndOfFileInBackgroundAndNotify];
+//    [task setStandardOutput:outputPipe];
+//    [task launch];
+//    [task setTerminationHandler:^(NSTask *task) {
         NSLog(@"ENCODING/UPLOADING");
         
-        NSData * data = [[NSData alloc ]initWithContentsOfFile:kAudioFilePathConvert];
+        NSData * data = [[NSData alloc ]initWithContentsOfFile:kAudioFilePath];
         NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://api.wit.ai/speech?v=20140508"]];
         [req setHTTPMethod:@"POST"];
         [req setCachePolicy:NSURLCacheStorageNotAllowed];
         [req setTimeoutInterval:15.0];
         [req setHTTPBody:data];
         [req setValue:[NSString stringWithFormat:@"Bearer %@", @"EUOKNV6J5WMTO5TVFH5YB7UJZRAFQ3KD"] forHTTPHeaderField:@"Authorization"];
-        [req setValue:@"audio/mpeg3" forHTTPHeaderField:@"Content-type"];
+        [req setValue:@"audio/wav" forHTTPHeaderField:@"Content-type"];
         [req setValue:@"application/json" forHTTPHeaderField:@"Accept"];
         
         [NSURLConnection sendAsynchronousRequest:req
@@ -158,7 +158,7 @@
                                        [NSUserNotificationCenter.defaultUserNotificationCenter removeAllDeliveredNotifications];
                                    });
                                }];
-    }];
+    //}];
 }
 
 -(ActionHandler *)action {
